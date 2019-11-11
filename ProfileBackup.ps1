@@ -330,11 +330,11 @@ function Show-profile_backup {
 		$source = $textbox1.Text
 		$dest = $textbox2.Text
 		$richtextbox1.Text += "$beginning`n`n"
-		$richtextbox1.Text += "Initializing Backup Proceedure...`n"
+		$richtextbox1.Text += "Initializing Backup Procedure...`n"
 		$richtextbox1.Text += "####################################################"
 		$richtextbox1.Text += "`n`nPlease check the log file for verification of file transfers. Located: $source\desktop\backuplog.txt.`n`n"
 		$richtextbox1.Text += "####################################################"
-		$speak.Speak("Initializing backup proceedure. Please wait a moment while I count the directories and files.")
+		$speak.Speak("Initializing backup Procedure. Please wait a moment while I count the directories and files.")
 		$becauseAricIsAB = "{0:N2} GB" -f ((Get-ChildItem $source -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1GB)
 		$recursiveObjectCount = Get-ChildItem -path $source -Recurse | Measure-Object | %{ $_.Count }
 		$recursiveObjectCountDirectory = Get-ChildItem -path $source -Recurse -Directory | Measure-Object | %{ $_.Count }
@@ -1467,11 +1467,11 @@ function Show-gddgfhdfghgfdh_psf {
 	{
 			$source = $textbox1.Text
 			$dest = $textbox2.Text
-			$richtextbox1.Text = "Initializing Backup Proceedure...`n"
+			$richtextbox1.Text = "Initializing Backup Procedure...`n"
 			$richtextbox1.Text += "#############################################################################################################"
 			$richtextbox1.Text += "`n`nPlease check the log file for verification of file transfers. Located: $source\desktop\backuplog.txt.`n`n"
 			$richtextbox1.Text += "#############################################################################################################"
-			$speak.Speak("Initializing backup proceedure. Please wait a moment while I count the directories and files.")
+			$speak.Speak("Initializing backup Procedure. Please wait a moment while I count the directories and files.")
 			$becauseAricIsAB = "{0:N2} GB" -f ((Get-ChildItem $source -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1GB)
 			$recursiveObjectCount = Get-ChildItem -path $source -Recurse | Measure-Object | %{ $_.Count }
 			$recursiveObjectCountDirectory = Get-ChildItem -path $source -Recurse -Directory | Measure-Object | %{ $_.Count }
