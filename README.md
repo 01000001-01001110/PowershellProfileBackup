@@ -41,4 +41,6 @@ I also have a gather inventory function that grabs and consolidates the followin
 I use the cortana default voice to verbally queue you to what the script is doing as I have not figured out how to create jobs/runspaces yet. <br>
 <br>
 <br>
+
+If you like my work please buy me a tea <a href="https://www.buymeacoffee.com/mwWXAyznc">here</a>. 
 -Alan Newingham
