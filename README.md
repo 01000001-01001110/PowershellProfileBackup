@@ -43,4 +43,7 @@ I use the cortana default voice to verbally queue you to what the script is doin
 <br>
 
 If you like my work please consider buying me a tea <a href="https://www.buymeacoffee.com/mwWXAyznc">here</a>. 
+<br>
+Thank you, <br>
+<br>
 -Alan Newingham
