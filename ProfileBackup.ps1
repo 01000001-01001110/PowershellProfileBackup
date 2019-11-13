@@ -268,19 +268,19 @@ function Show-profilebackup {
 		Write-Host = "Firewalls"
 		$richtextbox1.Text += "Gathering Firewall Settings.`n"
 		Get-NetFirewallRule -PolicyStore ActiveStore | Export-CSV "$Path\Firewall.csv" -NoTypeInfo
-		Write-Host = "Application Events - Not Gathered Due to Secuity Policies."
-		#Get-ApplicationEvents
-		Write-Host = "System Events - Not Gathered Due to Secuity Policies."
-		#Get-SystemEvents
+		Write-Host = "Application Events"
+		Get-ApplicationEvents
+		Write-Host = "System Events"
+		Get-SystemEvents
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
-		#$richtextbox1.Text += "Gathering Current Processes.`n"
-		#Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		Write-Host = "Service - Not Gathered Due to Secuity Policies."
-		#$richtextbox1.Text += "Gathering System Services.`n"
-		#Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
+		Write-Host = "Processes"
+		$richtextbox1.Text += "Gathering Current Processes.`n"
+		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
+		Write-Host = "Services"
+		$richtextbox1.Text += "Gathering System Services.`n"
+		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
 		Get-Excel
 		#More housekeeping
