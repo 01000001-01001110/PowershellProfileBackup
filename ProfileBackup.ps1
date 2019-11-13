@@ -21,28 +21,32 @@ function Show-profilebackup {
 	#region Generated Form Objects
 	#----------------------------------------------
 	[System.Windows.Forms.Application]::EnableVisualStyles()
-	$formProfileBackup = New-Object 'System.Windows.Forms.Form'
+	$formProfileBackup011ByAl = New-Object 'System.Windows.Forms.Form'
 	$statusbar1 = New-Object 'System.Windows.Forms.StatusBar'
 	$buttonCopyToClipboard = New-Object 'System.Windows.Forms.Button'
 	$labelLog = New-Object 'System.Windows.Forms.Label'
 	$labelCheckDirectoryYouWan = New-Object 'System.Windows.Forms.Label'
 	$Info = New-Object 'System.Windows.Forms.GroupBox'
 	$labelenvUserName = New-Object 'System.Windows.Forms.Label'
+	$labelVer = New-Object 'System.Windows.Forms.Label'
 	$labelOSInstallDate = New-Object 'System.Windows.Forms.Label'
+	$labeloperatingSystemID = New-Object 'System.Windows.Forms.Label'
 	$labelenvCOMPUTERNAME = New-Object 'System.Windows.Forms.Label'
+	$labeloperatingSystemNumbe = New-Object 'System.Windows.Forms.Label'
 	$labelAuthenticatedUser = New-Object 'System.Windows.Forms.Label'
 	$labelInstDate = New-Object 'System.Windows.Forms.Label'
 	$labelWindowsUser = New-Object 'System.Windows.Forms.Label'
 	$label1 = New-Object 'System.Windows.Forms.Label'
 	$labelDeviceName = New-Object 'System.Windows.Forms.Label'
-	$labelProfileBackup010 = New-Object 'System.Windows.Forms.Label'
 	$buttonPrograms = New-Object 'System.Windows.Forms.Button'
 	$progressbar1 = New-Object 'System.Windows.Forms.ProgressBar'
 	$groupbox3 = New-Object 'System.Windows.Forms.GroupBox'
+	$checkboxOneNote2016 = New-Object 'System.Windows.Forms.CheckBox'
+	$checkboxStickyNotes = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxAdobeSignatureSecuri = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxOfficeRibbonAndQAT = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxOutlookSettings = New-Object 'System.Windows.Forms.CheckBox'
-	$checkboxOfficeSignature = New-Object 'System.Windows.Forms.CheckBox'
+	$checkboxOutlookSignature = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxOneDrive = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxCustomDirectory = New-Object 'System.Windows.Forms.CheckBox'
 	$textbox7 = New-Object 'System.Windows.Forms.TextBox'
@@ -70,7 +74,7 @@ function Show-profilebackup {
 	# User Generated Script
 	#----------------------------------------------
 	
-	$formProfileBackup_Load={
+	$formProfileBackup011ByAl_Load={
 		#TODO: Initialize Form Controls here
 		
 	}
@@ -78,7 +82,8 @@ function Show-profilebackup {
 	
 	#Begin Region - Automatic System Information Gathering
 	#shortened my information gathering script to this as it was taking the script too long to load on startup. 
-	
+	$operatingSystemNumber = (Get-WmiObject -class Win32_OperatingSystem).Caption
+	$operatingSystemID = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name ReleaseId).ReleaseId
 	$CurrentUserName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 	[string]$ComputerName = $env:computername
 	$Computer = $ComputerName
@@ -270,18 +275,21 @@ function Show-profilebackup {
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		Write-Host = "Processes"
-		$richtextbox1.Text += "Gathering Current Processes.`n"
-		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		Write-Host = "Service"
-		$richtextbox1.Text += "Gathering System Services.`n"
-		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
+		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
+		#$richtextbox1.Text += "Gathering Current Processes.`n"
+		#Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
+		Write-Host = "Service - Not Gathered Due to Secuity Policies."
+		#$richtextbox1.Text += "Gathering System Services.`n"
+		#Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
 		Get-Excel
 		#More housekeeping
 		$richtextbox1.Text += "Deleting all other data that is not needed anymore.`n"
 		$deleteallotherdatanow = "$dest\Desktop\$cn\Logs\*"
 		Remove-Item -Recurse -Path $deleteallotherdatanow -Exclude Combined-data.xlsx -Force
+		$deleteallotherdatanowbutnotthis = "$dest\Desktop\$cn\Logs"
+		#Let us copy this file to a better spot. 
+		Copy-Item "$deleteallotherdatanowbutnotthis\Combined-data.xlsx" -Destination "$dest\Logs\$cn"
 		#Time to clean up this mess.
 		Remove-Variable ExportFile
 		Remove-Variable ExportFolder
@@ -318,23 +326,24 @@ function Show-profilebackup {
 		$beginning = Get-Date
 		$source = $textbox1.Text
 		$dest = $textbox2.Text
-		$richtextbox1.Text += "$beginning"
-		$richtextbox1.Text += "`n`n"
-		$richtextbox1.Text += "Initializing Backup Proceedure...`n"
+		$richtextbox1.Text += "Log Start time: $beginning"
+		$richtextbox1.Text += "`n"
+		$richtextbox1.Text += "`nInitializing Backup Procedure...`n"
 		$richtextbox1.Text += "####################################################"
 		$richtextbox1.Text += "`n`nPlease check the log file for verification of file transfers. Located: $source\desktop\backuplog.txt.`n`n"
 		$richtextbox1.Text += "####################################################"
-		$speak.Speak("Initializing backup proceedure. Please wait a moment while I count the directories and files.")
+		$speak.Speak("Initializing backup Procedure. Please wait a moment while I count the directories and files.")
 		$becauseAricIsAB = "{0:N2} GB" -f ((Get-ChildItem $source -Recurse | Measure-Object -Property Length -Sum -ErrorAction Stop).Sum / 1GB)
 		$recursiveObjectCount = Get-ChildItem -path $source -Recurse | Measure-Object | %{ $_.Count }
 		$recursiveObjectCountDirectory = Get-ChildItem -path $source -Recurse -Directory | Measure-Object | %{ $_.Count }
 		$recursiveObjectCountFile = Get-ChildItem -path $source -Recurse -File | Measure-Object | %{ $_.Count }
 		$speak.Speak("There are a total of $recursiveObjectCount objects in this profile. With a size of $becauseAricIsAB")
 		$richtextbox1.Text += "`nThere are a total of $recursiveObjectCount objects in this profile. With a size of $becauseAricIsAB."
-		$richtextbox1.Text += "`n There are a total of $recursiveObjectCountDirectory directories, and $recursiveObjectCountFile files. "
+		$richtextbox1.Text += "`nThere are a total of $recursiveObjectCountDirectory directories, and $recursiveObjectCountFile files in this profile. "
 		$speak.Speak("This will take some time.")
 		$richtextbox1.Text += "`n`nWe are checking that the source path is valid. "
-		$richtextbox1.Text += "`nIf not you will receive an error message.`n`n"
+		$richtextbox1.Text += "`nIf not you will receive an error message."
+		$richtextbox1.Text += "`n#############`n"
 		If (Test-Path $source)
 		{
 			If ($checkboxDesktop.Checked)
@@ -342,13 +351,13 @@ function Show-profilebackup {
 				$ProgressBar1.Value = "15"
 				$speak.Speak("`nBacking up the Desktop Directory")
 				$richtextbox1.Text += "`nInitializing Desktop Directory Backup."
-				$desktopDirectory = "{0:N2} GB" -f ((gci $source\Desktop | measure Length -s).sum / 1Gb)
+				$desktopDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Desktop | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nThe Desktop Directory is $desktopDirectory."
 				Robocopy $source\Desktop $dest\Desktop *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$desktopDirectory2 = "{0:N2} GB" -f ((gci $dest\Desktop | measure Length -s).sum / 1Gb)
+				$desktopDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Desktop | Measure-Object Length -s).sum / 1Gb)
 				if ($desktopDirectory -eq $desktopDirectory2)
 				{
-					$richtextbox1.Text += "`nDesktop Directory Completed Backing Up.."
+					$richtextbox1.Text += "`nDesktop Directory Completed Backing Up."
 					$speak.Speak("The Desktop Directory Completed Backing Up. Continuing backup.")
 					$richtextbox1.Text += "`n#############`n"
 					$ProgressBar1.Value = "30"
@@ -364,13 +373,13 @@ function Show-profilebackup {
 			{
 				$richtextbox1.Text += "`nInitializing Documents Directory Backup."
 				$speak.Speak("Backing up the Documents Directory")
-				$documentsDirectory = "{0:N2} GB" -f ((gci $source\Documents | measure Length -s).sum / 1Gb)
+				$documentsDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Documents | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nThe Documents Directory is $documentsDirectory."
 				Robocopy $source\Documents $dest\Documents *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$documentsDirectory2 = "{0:N2} GB" -f ((gci $dest\Documents | measure Length -s).sum / 1Gb)
+				$documentsDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Documents | Measure-Object Length -s).sum / 1Gb)
 				if ($documentsDirectory -eq $documentsDirectory2)
 				{
-					$richtextbox1.Text += "`nDocuments Directory Completed Backing Up.."
+					$richtextbox1.Text += "`nDocuments Directory Completed Backing Up."
 					$speak.Speak("The Documents Directory Completed Backing Up. Continuing backup.")
 					$richtextbox1.Text += "`n#############`n"
 					$ProgressBar1.Value = "45"
@@ -386,13 +395,13 @@ function Show-profilebackup {
 			{
 				$richtextbox1.Text += "`nInitializing Downloads Directory Backup."
 				$speak.Speak("Backing up the Downloads Directory")
-				$downloadsDirectory = "{0:N2} GB" -f ((gci $source\Downloads | measure Length -s).sum / 1Gb)
+				$downloadsDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Downloads | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nThe Downloads Directory is $downloadsDirectory."
 				Robocopy $source\Downloads $dest\Downloads *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$downloadsDirectory2 = "{0:N2} GB" -f ((gci $dest\Downloads| measure Length -s).sum / 1Gb)
+				$downloadsDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Downloads| Measure-Object Length -s).sum / 1Gb)
 				if ($downloadsDirectory -eq $downloadsDirectory2)
 				{
-					$richtextbox1.Text += "`nDownloads Directory Completed Backing Up.."
+					$richtextbox1.Text += "`nDownloads Directory Completed Backing Up."
 					$speak.Speak("The Downloads Directory Completed Backing Up. Continuing backup.")
 					$richtextbox1.Text += "`n#############`n"
 					$ProgressBar1.Value = "57"
@@ -458,43 +467,94 @@ function Show-profilebackup {
 						$ie | Stop-Process -Force
 					}
 				}
+				
+				
+				#Find and close Opera Explorer
+				$opera = Get-Process Opera -ErrorAction SilentlyContinue
+				if ($opera)
+				{
+					$speak.Speak("Opera was found running, closing the application gracefully.")
+					# try gracefully first
+					$opera.CloseMainWindow()
+					# kill after five seconds
+					Sleep 5
+					if (!$opera.HasExited)
+					{
+						$speak.Speak("Opera was found running, closing.")
+						$opera | Stop-Process -Force
+					}
+				}
+				
+				
+				#Find and close Vivaldi Explorer
+				$vivaldi = Get-Process Vivaldi -ErrorAction SilentlyContinue
+				if ($vivaldi)
+				{
+					$speak.Speak("Opera was found running, closing the application gracefully.")
+					# try gracefully first
+					$vivaldi.CloseMainWindow()
+					# kill after five seconds
+					Sleep 5
+					if (!$vivaldi.HasExited)
+					{
+						$speak.Speak("Opera was found running, closing.")
+						$vivaldi | Stop-Process -Force
+					}
+				}
+				Remove-Variable vivaldi
+				Remove-Variable opera
 				Remove-Variable ie
 				Remove-Variable chrome
 				Remove-Variable firefox
 				
-				$favoritesDirectory = "{0:N2} GB" -f ((gci $source\Favorites | measure Length -s).sum / 1Gb)
-				$richtextbox1.Text += "`nInitializing IE Favorites Backup. IE Favorites Directory is $favoritesDirectory large."
-				$richtextbox1.Text += "`n#############`n"
+				$favoritesDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Favorites | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n`nSometimes I do not close all the windows, please verify that all browser windows are closed now."
-				$richtextbox1.Text += "`n#############`n"
 				$richtextbox1.Text += "`n`nFailure to close the browser windows will halt the backup until they are closed."
-				$richtextbox1.Text += "`nYou have been warned...`n`n`n"
+				$richtextbox1.Text += "`nYou have been warned..."
+				$richtextbox1.Text += "####################################################"
+				#IE Favorites
+				$richtextbox1.Text += "`nInitializing IE Favorites Backup. `nIE Favorites Directory is $favoritesDirectory large."
 				Robocopy $source\Favorites $dest\Favorites *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				$ProgressBar1.Value = "60"
-				$chromeDirectory = "{0:N2} GB" -f ((gci "$source\AppData\Local\Google\Chrome\User Data\Default" | measure Length -s).sum / 1Gb)
+				#Chrome Bookmarks
+				$chromeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Google\Chrome\User Data\Default" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Chrome Bookmarks Backup. The Chrome Bookmarks are $chromeDirectory large."
+				$richtextbox1.Text += "`nInitializing Chrome Bookmarks Backup. `nThe Chrome Bookmarks are $chromeDirectory large."
 				Robocopy "$source\AppData\Local\Google\Chrome\User Data\Default" "$destAppData\AppData\Local\Google\Chrome\User Data\Default" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				$ProgressBar1.Value = "63"
-				$firefoxDirectory = "{0:N2} GB" -f ((gci $source\AppData\Roaming\Mozilla\Firefox\Profiles | measure Length -s).sum / 1Gb)
+				#Opera Favorites		
+				$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Roaming\Opera Software" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Firefox Bookmarks Backup. The Firefox Bookmarks Are $firefoxDirectory Large."
+				$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $operaDirectory Large."
+				Robocopy "$source\AppData\Roaming\Opera Software" "$dest\AppData\Roaming\Opera Software" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				$ProgressBar1.Value = "64"
+				#Vivaldi Favorites		
+				$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" | Measure-Object Length -s).sum / 1Gb)
+				$richtextbox1.Text += "`n#############`n"
+				$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $operaDirectory Large."
+				Robocopy "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" "$dest\AppData\Local\Vivaldi\User Data\Default\Bookmarks" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				$ProgressBar1.Value = "64"
+				#Firefox Bookmarks
+				$firefoxDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\AppData\Roaming\Mozilla\Firefox\Profiles | Measure-Object Length -s).sum / 1Gb)
+				$richtextbox1.Text += "`n#############`n"
+				$richtextbox1.Text += "`nInitializing Firefox Bookmarks Backup. `nThe Firefox Bookmarks Are $firefoxDirectory Large."
 				Robocopy $source\AppData\Roaming\Mozilla\Firefox\Profiles $dest\AppData\Roaming\Mozilla\Firefox\Profiles *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$richtextbox1.Text += "`nIE, FireFox, and Chrome Bookmark directories Completed Backing Up.."
-				$speak.Speak("The Eye E, Fire Fox and Chrome Bookmarks directories Completed Backing Up. Continuing backup.")
-				$richtextbox1.Text += "`n#############`n"
+				$richtextbox1.Text += "`n`nIE, FireFox, Opera, Chrome and Vivaldi Bookmark Directories Completed Backing Up."
+				$speak.Speak("The Eye E, Fire Fox, Opera, and Chrome Bookmarks Directories Completed Backing Up. Continuing backup.")
+				$richtextbox1.Text += "`n####################################################"
 				$ProgressBar1.Value = "65"
 			}
 			If ($checkboxPictures.Checked)
 			{
-				$picturesDirectory = "{0:N2} GB" -f ((gci $source\Pictures | measure Length -s).sum / 1Gb)
+				#Pictures Directory
+				$picturesDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Pictures | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nInitializing Pictures Directory Backup. This directory is $picturesDirectory large."
 				$speak.Speak("Backing up the Pictures Directory")
 				Robocopy $source\Pictures $dest\Pictures *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$picturesDirectory2 = "{0:N2} GB" -f ((gci $dest\Pictures | measure Length -s).sum / 1Gb)
+				$picturesDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Pictures | Measure-Object Length -s).sum / 1Gb)
 				if ($picturesDirectory -eq $picturesDirectory2)
 				{
-					$richtextbox1.Text += "`nPictures Directory Completed Backing Up.."
+					$richtextbox1.Text += "`nPictures Directory Completed Backing Up."
 					$speak.Speak("The Pictures Directory Completed Backing Up. Continuing backup.")
 					$richtextbox1.Text += "`n###################`n"
 					$ProgressBar1.Value = "75"
@@ -507,32 +567,34 @@ function Show-profilebackup {
 					}
 			}
 			If ($checkboxVideos.Checked)
+				#Videos Directory
+				{
+					$videoDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Videos | Measure-Object Length -s).sum / 1Gb)
+					$richtextbox1.Text += "`nInitializing Video Directory Backup. "
+					$richtextbox1.Text += "`nThis directory is $videoDirectory large."
+					$speak.Speak("Backing up the Video Directory")
+					Robocopy $source\Videos $dest\Videos *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+					$videoDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Videos | Measure-Object Length -s).sum / 1Gb)
+					if ($videoDirectory -eq $videoDirectory2)
 					{
-						$videoDirectory = "{0:N2} GB" -f ((gci $source\Videos | measure Length -s).sum / 1Gb)
-						$richtextbox1.Text += "`nInitializing Video Directory Backup. "
-						$richtextbox1.Text += "`nThis directory is $videoDirectory large."
-						$speak.Speak("Backing up the Video Directory")
-						Robocopy $source\Videos $dest\Videos *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-						$videoDirectory2 = "{0:N2} GB" -f ((gci $dest\Videos | measure Length -s).sum / 1Gb)
-						if ($videoDirectory -eq $videoDirectory2)
-						{
-							$richtextbox1.Text += "`nVideos Directory Completed Backing Up.."
-							$speak.Speak("The Videos Directory Completed Backing Up. Continuing backup.")
-							$richtextbox1.Text += "`n#############`n"
-							$ProgressBar1.Value = "80"
-						}
-							else
-							{
-								$speak.Speak("Source and Destination Directories Do Not Match, Please Check Logs!")
-								$result = [System.Windows.Forms.MessageBox]::Show('Video Directory Source and Destination Directories Do Not Match, Please Check Logs!', 'Warning', 'YesNo', 'Warning')
-								$result
-							}
+						$richtextbox1.Text += "`nVideos Directory Completed Backing Up."
+						$speak.Speak("The Videos Directory Completed Backing Up. Continuing backup.")
+						$richtextbox1.Text += "`n#############`n"
+						$ProgressBar1.Value = "80"
 					}
+						else
+						{
+							$speak.Speak("Source and Destination Directories Do Not Match, Please Check Logs!")
+							$result = [System.Windows.Forms.MessageBox]::Show('Video Directory Source and Destination Directories Do Not Match, Please Check Logs!', 'Warning', 'YesNo', 'Warning')
+							$result
+						}
+				}
 			If ($checkboxQuickparts.Checked)
 			{
+				#Office Quick Parts
 				$richtextbox1.Text += "`nInitializing Quick Parts Backup."
 				Robocopy "$source\application data\microsoft\templates" "$dest\application data\microsoft\templates" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$richtextbox1.Text += "`nQuickParts Directory Completed Backing Up.."
+				$richtextbox1.Text += "`nQuickParts Directory Completed Backing Up."
 				$speak.Speak("The Microsoft QuickParts Completed Backing Up. Continuing backup.")
 				$richtextbox1.Text += "`n#############`n"
 				$ProgressBar1.Value = "90"
@@ -540,13 +602,14 @@ function Show-profilebackup {
 			}
 			If ($checkboxCustomDirectory.Checked)
 			{
+				#Custom Directory 
 				$source1 = $textbox7.Text
-				$customDirectory = "{0:N2} GB" -f ((gci $source1 | measure Length -s).sum / 1Gb)
+				$customDirectory = "{0:N2} GB" -f ((Get-ChildItem $source1 | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nInitializing Custom Directory Backup. "
 				$richtextbox1.Text += "`nThe $source1 Directory is $customDirectory Large."
 				$richtextbox1.Text += "`nBacking up Directory $source1"
 				Robocopy $source1 $dest\Custom_Directory_Backup *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$customDirectory2 = "{0:N2} GB" -f ((gci $dest\Custom_Directory_Backup | measure Length -s).sum / 1Gb)
+				$customDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Custom_Directory_Backup | Measure-Object Length -s).sum / 1Gb)
 				if ($customDirectory -eq $customDirectory2)
 				{
 					$richtextbox1.Text += "`n$source1 Directory Completed Backing Up to $dest\Custom_Directory_Backup."
@@ -563,32 +626,51 @@ function Show-profilebackup {
 			}
 			If ($checkboxOneDrive.Checked)
 			{
+				#OneDrive Backup
 				$richtextbox1.Text += "`nInitializing OneDrive Directory Backup."
 				Robocopy $source\OneDrive - Embry-Riddle Aeronautical University $dest\OneDrive - Embry-Riddle Aeronautical University.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$richtextbox1.Text += "`nOneDrive Directory Completed Backing Up.."
+				$richtextbox1.Text += "`nOneDrive Directory Completed Backing Up."
 				$speak.Speak("The OneDrive, Directory Completed Backing Up. 95 percent complete")
 				$richtextbox1.Text += "`n#############`n"
 				$ProgressBar1.Value = "95"
 			}
 			If ($checkboxAdobeSignatureSecuri.Checked)
 			{
+				#Adobe Signature 
 				$richtextbox1.Text += "`nInitializing Adobe Signature/Security Directory Backup."
 				Robocopy $source\AppData\Roaming\Adobe\Acrobat\DC\Security $dest\AppData\Roaming\Adobe\Acrobat\DC\Security *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$richtextbox1.Text += "`nAdobe Signature/security Directory Completed Backing Up.."
+				$richtextbox1.Text += "`nAdobe Signature/security Directory Completed Backing Up."
 				$richtextbox1.Text += "`n#############`n"
 				$speak.Speak("The Adobe signature file Completed Backing Up.")
 			}
-			If ($checkboxOfficeSignature.Checked)
+			If ($checkboxOutlookSignature.Checked)
 			{
+				#Outlook Signature
 				$richtextbox1.Text += "`nInitializing Outlook Signature Directory Backup."
 				Robocopy $source\application data\microsoft\signatures $dest\application data\microsoft\signatures *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				$richtextbox1.Text += "`nOutlook Signature Completed Backing Up.."
+				$richtextbox1.Text += "`nOutlook Signature Completed Backing Up."
 				$speak.Speak("The Outlook signatureCompleted Backing Up. 96 percent complete")
 				$richtextbox1.Text += "`n#############`n"
 				$ProgressBar1.Value = "96"
 			}
 			If ($checkboxOutlookSettings.Checked)
 			{
+				#Find and close Oulook Client
+				$outlook = Get-Process Outlook -ErrorAction SilentlyContinue
+				if ($outlook)
+				{
+					$speak.Speak("Outlook was found running, closing the application gracefully.")
+					# try gracefully first
+					$outlook.CloseMainWindow()
+					# kill after five seconds
+					Sleep 5
+					if (!$outlook.HasExited)
+					{
+						$speak.Speak("Opera was found running, closing.")
+						$outlook | Stop-Process -Force
+					}
+				}
+				
 				#Outlook 2016 Settings Export
 				#cmd /c "REG EXPORT 'HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook' '$dest\Outlook16-config.reg' /y"
 				#REG EXPORT 'HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook' '$dest\Outlook16-config.reg' /y
@@ -609,24 +691,48 @@ function Show-profilebackup {
 				Robocopy $source\AppData\Local\Microsoft\Office $dest\AppData\Local\Microsoft\Office *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				$richtextbox1.Text += "`nThe Ribbon and QAT settings in Outlook have been backed up."
 				$speak.Speak("The Ribbon and QAT settings in Outlook have been backed up. 99 percent complete.")
+				$richtextbox1.Text += "`n#############`n"
 			}
+			If ($checkboxStickyNotes.Checked)
+			{
+				#Sticky Notes
+				$richtextbox1.Text += "`nInitializing Sticky Notes Directory Backup."
+				Robocopy $source\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState $dest\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				$richtextbox1.Text += "`nStickey Notes Directory Backup Completed.."
+				$speak.Speak("Stickey Notes Directory Completed Backing Up.")
+				$richtextbox1.Text += "`n#############`n"
+			}
+			If ($checkboxOneNote2016.Checked)
+			{
+				#OneNote 2016
+				$richtextbox1.Text += "`nInitializing OneNote 2016 Directory Backup."
+				Robocopy $source\AppData\Local\Microsoft\OneNote\version\Backup $dest\AppData\Local\Microsoft\OneNote\version\Backup *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				$richtextbox1.Text += "`nOneNote 2016 Directory Backup Completed.."
+				$speak.Speak("One Note 2016 Directory Completed Backing Up.")
+				$richtextbox1.Text += "`n#############`n"
+			}
+			
+			#Onedrive not sync'd files
 			$richtextbox1.Text += "`nInitializing OneDrive-Not-Yet-Syncd-Files Directory Backup."
 			Robocopy $source\ODBA $dest\ODBA *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-			$richtextbox1.Text += "`nOneDrive-Not-Yet-Syncd-Files Directory Completed Backing Up.."
-			$speak.Speak("OneDrive Not Yet Sinked Files Directory Completed Backing Up.. 99 point 99 percent complete.")
+			$richtextbox1.Text += "`nOneDrive-Not-Yet-Syncd-Files Directory Completed Backing Up."
+			$speak.Speak("OneDrive Not Yet Sinked Files Directory Completed Backing Up. 99 point 99 percent complete.")
 			$richtextbox1.Text += "`n#############`n"
+	
 			$ProgressBar1.Value = "100"
 			$richtextbox1.Text += "`nPlease check the log file for verification of file transfers. Located: $source\desktop\backuplog.txt."
 			$speak.Speak("All selected directories Completed Backing Up. ")
 			$richtextbox1.Text += "`nDon't forget to grab all printers, and inventory off the old computer before shutting it down."
 			$end = Get-Date
-			$statusbar1.Text += "Completed Backup... Written by: Alan Newingham."
-			$richtextbox1.Text += "`nCompleted Backup on $end"
+			$statusbar1.Text += "Completed BackUp.. Written by: Alan Newingham."
+			$richtextbox1.Text += "`nCompleted Backup at: $end"
+			control printers
 			$statusbar1.Visible = $true
 			Start-Sleep -Seconds 15
 			$statusbar1.Visible = $false
 			$result = [System.Windows.Forms.MessageBox]::Show('This Operation Completed Successfully!', 'Warning', 'OK', 'Warning')
 			$result
+			Copy-Item "$source\desktop\backuplog.txt" -Destination "$dest\Logs"
 		}
 		Else
 		{
@@ -667,6 +773,12 @@ function Show-profilebackup {
 			$statusbar1.Visible = $false
 		}
 	}
+	
+	$richtextbox1_TextChanged = {
+		$richtextbox1.SelectionStart = $richtextbox1.TextLength;
+		$richtextbox1.ScrollToCaret()
+		$richtextbox1.Focus()
+	}
 	# --End User Generated Script--
 	#----------------------------------------------
 	#region Generated Events
@@ -675,7 +787,7 @@ function Show-profilebackup {
 	$Form_StateCorrection_Load=
 	{
 		#Correct the initial state of the form to prevent the .Net maximized form issue
-		$formProfileBackup.WindowState = $InitialFormWindowState
+		$formProfileBackup011ByAl.WindowState = $InitialFormWindowState
 	}
 	
 	$Form_Cleanup_FormClosed=
@@ -688,9 +800,10 @@ function Show-profilebackup {
 			$buttonInventory.remove_Click($buttonInventory_Click)
 			$buttonBACKUP.remove_Click($buttonBACKUP_Click)
 			$buttonPrinters.remove_Click($buttonPrinters_Click)
-			$formProfileBackup.remove_Load($formProfileBackup_Load)
-			$formProfileBackup.remove_Load($Form_StateCorrection_Load)
-			$formProfileBackup.remove_FormClosed($Form_Cleanup_FormClosed)
+			$richtextbox1.remove_TextChanged($richtextbox1_TextChanged)
+			$formProfileBackup011ByAl.remove_Load($formProfileBackup011ByAl_Load)
+			$formProfileBackup011ByAl.remove_Load($Form_StateCorrection_Load)
+			$formProfileBackup011ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
 		}
 		catch { Out-Null <# Prevent PSScriptAnalyzer warning #> }
 	}
@@ -699,33 +812,32 @@ function Show-profilebackup {
 	#----------------------------------------------
 	#region Generated Form Code
 	#----------------------------------------------
-	$formProfileBackup.SuspendLayout()
+	$formProfileBackup011ByAl.SuspendLayout()
 	$Info.SuspendLayout()
 	$groupbox3.SuspendLayout()
 	$groupbox2.SuspendLayout()
 	#
-	# formProfileBackup
+	# formProfileBackup011ByAl
 	#
-	$formProfileBackup.Controls.Add($statusbar1)
-	$formProfileBackup.Controls.Add($buttonCopyToClipboard)
-	$formProfileBackup.Controls.Add($labelLog)
-	$formProfileBackup.Controls.Add($labelCheckDirectoryYouWan)
-	$formProfileBackup.Controls.Add($Info)
-	$formProfileBackup.Controls.Add($labelProfileBackup010)
-	$formProfileBackup.Controls.Add($buttonPrograms)
-	$formProfileBackup.Controls.Add($progressbar1)
-	$formProfileBackup.Controls.Add($groupbox3)
-	$formProfileBackup.Controls.Add($buttonInventory)
-	$formProfileBackup.Controls.Add($groupbox2)
-	$formProfileBackup.Controls.Add($buttonBACKUP)
-	$formProfileBackup.Controls.Add($buttonPrinters)
-	$formProfileBackup.Controls.Add($richtextbox1)
-	$formProfileBackup.AutoScaleDimensions = '6, 13'
-	$formProfileBackup.AutoScaleMode = 'Font'
-	$formProfileBackup.ClientSize = '711, 557'
-	$formProfileBackup.Name = 'formProfileBackup'
-	$formProfileBackup.Text = 'Profile Backup '
-	$formProfileBackup.add_Load($formProfileBackup_Load)
+	$formProfileBackup011ByAl.Controls.Add($statusbar1)
+	$formProfileBackup011ByAl.Controls.Add($buttonCopyToClipboard)
+	$formProfileBackup011ByAl.Controls.Add($labelLog)
+	$formProfileBackup011ByAl.Controls.Add($labelCheckDirectoryYouWan)
+	$formProfileBackup011ByAl.Controls.Add($Info)
+	$formProfileBackup011ByAl.Controls.Add($buttonPrograms)
+	$formProfileBackup011ByAl.Controls.Add($progressbar1)
+	$formProfileBackup011ByAl.Controls.Add($groupbox3)
+	$formProfileBackup011ByAl.Controls.Add($buttonInventory)
+	$formProfileBackup011ByAl.Controls.Add($groupbox2)
+	$formProfileBackup011ByAl.Controls.Add($buttonBACKUP)
+	$formProfileBackup011ByAl.Controls.Add($buttonPrinters)
+	$formProfileBackup011ByAl.Controls.Add($richtextbox1)
+	$formProfileBackup011ByAl.AutoScaleDimensions = '6, 13'
+	$formProfileBackup011ByAl.AutoScaleMode = 'Font'
+	$formProfileBackup011ByAl.ClientSize = '711, 557'
+	$formProfileBackup011ByAl.Name = 'formProfileBackup011ByAl'
+	$formProfileBackup011ByAl.Text = 'Profile Backup 0.1.1 - By: Alan Newingham'
+	$formProfileBackup011ByAl.add_Load($formProfileBackup011ByAl_Load)
 	#
 	# statusbar1
 	#
@@ -769,16 +881,19 @@ function Show-profilebackup {
 	# Info
 	#
 	$Info.Controls.Add($labelenvUserName)
+	$Info.Controls.Add($labelVer)
 	$Info.Controls.Add($labelOSInstallDate)
+	$Info.Controls.Add($labeloperatingSystemID)
 	$Info.Controls.Add($labelenvCOMPUTERNAME)
+	$Info.Controls.Add($labeloperatingSystemNumbe)
 	$Info.Controls.Add($labelAuthenticatedUser)
 	$Info.Controls.Add($labelInstDate)
 	$Info.Controls.Add($labelWindowsUser)
 	$Info.Controls.Add($label1)
 	$Info.Controls.Add($labelDeviceName)
-	$Info.Location = '11, 442'
+	$Info.Location = '11, 425'
 	$Info.Name = 'Info'
-	$Info.Size = '246, 87'
+	$Info.Size = '246, 104'
 	$Info.TabIndex = 44
 	$Info.TabStop = $False
 	$Info.Text = 'Information'
@@ -794,6 +909,16 @@ function Show-profilebackup {
 	$labelenvUserName.Text = "$env:UserName"
 	$labelenvUserName.UseCompatibleTextRendering = $True
 	#
+	# labelVer
+	#
+	$labelVer.AutoSize = $True
+	$labelVer.Location = '177, 84'
+	$labelVer.Name = 'labelVer'
+	$labelVer.Size = '25, 17'
+	$labelVer.TabIndex = 53
+	$labelVer.Text = 'Ver:'
+	$labelVer.UseCompatibleTextRendering = $True
+	#
 	# labelOSInstallDate
 	#
 	$labelOSInstallDate.AutoSize = $True
@@ -804,6 +929,16 @@ function Show-profilebackup {
 	$labelOSInstallDate.Text = 'OS Install Date:'
 	$labelOSInstallDate.UseCompatibleTextRendering = $True
 	#
+	# labeloperatingSystemID
+	#
+	$labeloperatingSystemID.AutoSize = $True
+	$labeloperatingSystemID.Location = '210, 84'
+	$labeloperatingSystemID.Name = 'labeloperatingSystemID'
+	$labeloperatingSystemID.Size = '107, 17'
+	$labeloperatingSystemID.TabIndex = 52
+	$labeloperatingSystemID.Text = "$operatingSystemID"
+	$labeloperatingSystemID.UseCompatibleTextRendering = $True
+	#
 	# labelenvCOMPUTERNAME
 	#
 	$labelenvCOMPUTERNAME.AutoSize = $True
@@ -813,6 +948,16 @@ function Show-profilebackup {
 	$labelenvCOMPUTERNAME.TabIndex = 35
 	$labelenvCOMPUTERNAME.Text = "$LoggedOnUser"
 	$labelenvCOMPUTERNAME.UseCompatibleTextRendering = $True
+	#
+	# labeloperatingSystemNumbe
+	#
+	$labeloperatingSystemNumbe.AutoSize = $True
+	$labeloperatingSystemNumbe.Location = '8, 84'
+	$labeloperatingSystemNumbe.Name = 'labeloperatingSystemNumbe'
+	$labeloperatingSystemNumbe.Size = '136, 17'
+	$labeloperatingSystemNumbe.TabIndex = 51
+	$labeloperatingSystemNumbe.Text = "$operatingSystemNumber"
+	$labeloperatingSystemNumbe.UseCompatibleTextRendering = $True
 	#
 	# labelAuthenticatedUser
 	#
@@ -864,16 +1009,6 @@ function Show-profilebackup {
 	$labelDeviceName.Text = 'Device Name:'
 	$labelDeviceName.UseCompatibleTextRendering = $True
 	#
-	# labelProfileBackup010
-	#
-	$labelProfileBackup010.AutoSize = $True
-	$labelProfileBackup010.Location = '300, 9'
-	$labelProfileBackup010.Name = 'labelProfileBackup010'
-	$labelProfileBackup010.Size = '105, 17'
-	$labelProfileBackup010.TabIndex = 38
-	$labelProfileBackup010.Text = 'Profile Backup 0.1.0'
-	$labelProfileBackup010.UseCompatibleTextRendering = $True
-	#
 	# buttonPrograms
 	#
 	$buttonPrograms.BackColor = 'MenuHighlight'
@@ -896,10 +1031,12 @@ function Show-profilebackup {
 	#
 	# groupbox3
 	#
+	$groupbox3.Controls.Add($checkboxOneNote2016)
+	$groupbox3.Controls.Add($checkboxStickyNotes)
 	$groupbox3.Controls.Add($checkboxAdobeSignatureSecuri)
 	$groupbox3.Controls.Add($checkboxOfficeRibbonAndQAT)
 	$groupbox3.Controls.Add($checkboxOutlookSettings)
-	$groupbox3.Controls.Add($checkboxOfficeSignature)
+	$groupbox3.Controls.Add($checkboxOutlookSignature)
 	$groupbox3.Controls.Add($checkboxOneDrive)
 	$groupbox3.Controls.Add($checkboxCustomDirectory)
 	$groupbox3.Controls.Add($textbox7)
@@ -910,13 +1047,33 @@ function Show-profilebackup {
 	$groupbox3.Controls.Add($checkboxDocuments)
 	$groupbox3.Controls.Add($checkboxDownloads)
 	$groupbox3.Controls.Add($checkboxDesktop)
-	$groupbox3.Location = '12, 140'
+	$groupbox3.Location = '13, 91'
 	$groupbox3.Name = 'groupbox3'
-	$groupbox3.Size = '246, 281'
+	$groupbox3.Size = '246, 328'
 	$groupbox3.TabIndex = 29
 	$groupbox3.TabStop = $False
 	$groupbox3.Text = 'Directories'
 	$groupbox3.UseCompatibleTextRendering = $True
+	#
+	# checkboxOneNote2016
+	#
+	$checkboxOneNote2016.Location = '6, 157'
+	$checkboxOneNote2016.Name = 'checkboxOneNote2016'
+	$checkboxOneNote2016.Size = '122, 14'
+	$checkboxOneNote2016.TabIndex = 43
+	$checkboxOneNote2016.Text = 'OneNote 2016'
+	$checkboxOneNote2016.UseCompatibleTextRendering = $True
+	$checkboxOneNote2016.UseVisualStyleBackColor = $True
+	#
+	# checkboxStickyNotes
+	#
+	$checkboxStickyNotes.Location = '6, 251'
+	$checkboxStickyNotes.Name = 'checkboxStickyNotes'
+	$checkboxStickyNotes.Size = '122, 24'
+	$checkboxStickyNotes.TabIndex = 42
+	$checkboxStickyNotes.Text = 'Sticky Notes'
+	$checkboxStickyNotes.UseCompatibleTextRendering = $True
+	$checkboxStickyNotes.UseVisualStyleBackColor = $True
 	#
 	# checkboxAdobeSignatureSecuri
 	#
@@ -948,19 +1105,19 @@ function Show-profilebackup {
 	$checkboxOutlookSettings.UseCompatibleTextRendering = $True
 	$checkboxOutlookSettings.UseVisualStyleBackColor = $True
 	#
-	# checkboxOfficeSignature
+	# checkboxOutlookSignature
 	#
-	$checkboxOfficeSignature.Location = '6, 209'
-	$checkboxOfficeSignature.Name = 'checkboxOfficeSignature'
-	$checkboxOfficeSignature.Size = '104, 24'
-	$checkboxOfficeSignature.TabIndex = 38
-	$checkboxOfficeSignature.Text = 'Office Signature'
-	$checkboxOfficeSignature.UseCompatibleTextRendering = $True
-	$checkboxOfficeSignature.UseVisualStyleBackColor = $True
+	$checkboxOutlookSignature.Location = '6, 209'
+	$checkboxOutlookSignature.Name = 'checkboxOutlookSignature'
+	$checkboxOutlookSignature.Size = '122, 24'
+	$checkboxOutlookSignature.TabIndex = 38
+	$checkboxOutlookSignature.Text = 'Outlook Signature'
+	$checkboxOutlookSignature.UseCompatibleTextRendering = $True
+	$checkboxOutlookSignature.UseVisualStyleBackColor = $True
 	#
 	# checkboxOneDrive
 	#
-	$checkboxOneDrive.Location = '6, 153'
+	$checkboxOneDrive.Location = '6, 273'
 	$checkboxOneDrive.Name = 'checkboxOneDrive'
 	$checkboxOneDrive.Size = '104, 24'
 	$checkboxOneDrive.TabIndex = 37
@@ -970,17 +1127,18 @@ function Show-profilebackup {
 	#
 	# checkboxCustomDirectory
 	#
-	$checkboxCustomDirectory.Location = '6, 251'
+	$checkboxCustomDirectory.Location = '6, 295'
 	$checkboxCustomDirectory.Name = 'checkboxCustomDirectory'
 	$checkboxCustomDirectory.Size = '122, 24'
 	$checkboxCustomDirectory.TabIndex = 36
+	$checkboxCustomDirectory.TabStop = $False
 	$checkboxCustomDirectory.Text = 'Custom Directory'
 	$checkboxCustomDirectory.UseCompatibleTextRendering = $True
 	$checkboxCustomDirectory.UseVisualStyleBackColor = $True
 	#
 	# textbox7
 	#
-	$textbox7.Location = '129, 253'
+	$textbox7.Location = '129, 295'
 	$textbox7.Name = 'textbox7'
 	$textbox7.Size = '100, 20'
 	$textbox7.TabIndex = 35
@@ -1074,7 +1232,7 @@ function Show-profilebackup {
 	$groupbox2.Controls.Add($textbox2)
 	$groupbox2.Controls.Add($labelFromLocation)
 	$groupbox2.Controls.Add($labelToLocation)
-	$groupbox2.Location = '12, 44'
+	$groupbox2.Location = '13, 9'
 	$groupbox2.Name = 'groupbox2'
 	$groupbox2.Size = '245, 76'
 	$groupbox2.TabIndex = 28
@@ -1150,25 +1308,26 @@ function Show-profilebackup {
 	$richtextbox1.Size = '429, 398'
 	$richtextbox1.TabIndex = 7
 	$richtextbox1.Text = ''
+	$richtextbox1.add_TextChanged($richtextbox1_TextChanged)
 	#
 	# tooltip1
 	#
 	$groupbox2.ResumeLayout()
 	$groupbox3.ResumeLayout()
 	$Info.ResumeLayout()
-	$formProfileBackup.ResumeLayout()
+	$formProfileBackup011ByAl.ResumeLayout()
 	#endregion Generated Form Code
 
 	#----------------------------------------------
 
 	#Save the initial state of the form
-	$InitialFormWindowState = $formProfileBackup.WindowState
+	$InitialFormWindowState = $formProfileBackup011ByAl.WindowState
 	#Init the OnLoad event to correct the initial state of the form
-	$formProfileBackup.add_Load($Form_StateCorrection_Load)
+	$formProfileBackup011ByAl.add_Load($Form_StateCorrection_Load)
 	#Clean up the control events
-	$formProfileBackup.add_FormClosed($Form_Cleanup_FormClosed)
+	$formProfileBackup011ByAl.add_FormClosed($Form_Cleanup_FormClosed)
 	#Show the Form
-	return $formProfileBackup.ShowDialog()
+	return $formProfileBackup011ByAl.ShowDialog()
 
 } #End Function
 
