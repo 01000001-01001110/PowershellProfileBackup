@@ -11,7 +11,7 @@ Currently this backs up;<br>
   Music<br>
   Quick Parts<br>
   Pictures<br>
-  Browsers (IE, Chrome, Firefox, Vivaldi, Opera)<br>
+  Browsers (IE, Chrome, Firefox, Vivaldi, Opera) The script will seek to close the browsers before backing up the data.<br>
   OneDrive<br>
   OneDrive Not sync'd yet files<br>
   OneNote 2016 Backup Directory<br>
@@ -20,7 +20,7 @@ Currently this backs up;<br>
   Adobe Security/Signature<br>
   Outlook Signature<br>
   Outlook Config Reg<br>
-  Outlook Settings<br>
+  Outlook Settings The script will seek to close Outlook before backing up the data. <br>
   Office Ribbon and QAT Settings<br>
   
 I also have a gather inventory function that grabs and consolidates the following information into one xlsx file: <br>
