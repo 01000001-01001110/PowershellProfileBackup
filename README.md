@@ -1,7 +1,7 @@
 # Powershell Profile Backup
 Windows profile backup
 
-This is a tool I have worked at perfecting for some time.
+![image](https://user-images.githubusercontent.com/48245017/68776176-a7e6b180-05fd-11ea-8474-6733d9b6228e.png)
 
 Currently this backs up;<br>
   Desktop<br>
@@ -11,14 +11,16 @@ Currently this backs up;<br>
   Music<br>
   Quick Parts<br>
   Pictures<br>
-  Browsers (IE, Chrome, Firefox)<br>
+  Browsers (IE, Chrome, Firefox, Vivaldi, Opera) The script will seek to close the browsers before backing up the data.<br>
   OneDrive<br>
   OneDrive Not sync'd yet files<br>
+  OneNote 2016 Backup Directory<br>
+  Sticky Notes<br>
   Custom Directory<br>
   Adobe Security/Signature<br>
   Outlook Signature<br>
   Outlook Config Reg<br>
-  Outlook Settings<br>
+  Outlook Settings The script will seek to close Outlook before backing up the data. <br>
   Office Ribbon and QAT Settings<br>
   
 I also have a gather inventory function that grabs and consolidates the following information into one xlsx file: <br>
