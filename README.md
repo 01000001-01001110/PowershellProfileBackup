@@ -1,7 +1,7 @@
 # Powershell Profile Backup
 Windows profile backup
 
-This is a tool I have worked at perfecting for some time.
+![ProfileBackup](https://user-images.githubusercontent.com/48245017/68775710-f8114400-05fc-11ea-9225-d9bf51872021.png)
 
 Currently this backs up;<br>
   Desktop<br>
@@ -11,9 +11,11 @@ Currently this backs up;<br>
   Music<br>
   Quick Parts<br>
   Pictures<br>
-  Browsers (IE, Chrome, Firefox)<br>
+  Browsers (IE, Chrome, Firefox, Vivaldi, Opera)<br>
   OneDrive<br>
   OneDrive Not sync'd yet files<br>
+  OneNote 2016 Backup Directory<br>
+  Sticky Notes<br>
   Custom Directory<br>
   Adobe Security/Signature<br>
   Outlook Signature<br>
