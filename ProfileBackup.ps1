@@ -42,6 +42,7 @@ function Show-ProfileBackup {
 	$buttonPrograms = New-Object 'System.Windows.Forms.Button'
 	$progressbar1 = New-Object 'System.Windows.Forms.ProgressBar'
 	$groupbox3 = New-Object 'System.Windows.Forms.GroupBox'
+	$checkboxSelectAll = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxOneNote2016 = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxStickyNotes = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxAdobeSignatureSecuri = New-Object 'System.Windows.Forms.CheckBox'
@@ -364,20 +365,21 @@ function Show-ProfileBackup {
 		$obj | Export-Csv -Path $Path\ComputerName.csv -Encoding UTF8 -NoTypeInformation
 		Write-Host = "Firewalls"
 		$richtextbox1.Text += "Gathering Firewall Settings.`n"
-		Get-NetFirewallRule -PolicyStore ActiveStore | Export-CSV "$Path\Firewall.csv" -NoTypeInfo
-		Write-Host = "Application Events - Not Gathered Due to Secuity Policies."
-		#Get-ApplicationEvents
-		Write-Host = "System Events - Not Gathered Due to Secuity Policies."
-		#Get-SystemEvents
+		Write-Host = "Application Events"
+		$logfile = Get-WmiObject -Class win32_NTEventlogFile  -Filter "logFileName='Application'"
+		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_Application_Logs.evt')
+		Write-Host = "System Events"
+		$logfile = Get-WmiObject -Class win32_NTEventlogFile  -Filter "logFileName='System'"
+		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_System_Logs.evt')
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
-		#$richtextbox1.Text += "Gathering Current Processes.`n"
-		#Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		Write-Host = "Service - Not Gathered Due to Secuity Policies."
-		#$richtextbox1.Text += "Gathering System Services.`n"
-		#Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
+		Write-Host = "Processes"
+		$richtextbox1.Text += "Gathering Current Processes.`n"
+		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
+		Write-Host = "Service"
+		$richtextbox1.Text += "Gathering System Services.`n"
+		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
 		Get-Excel
 		#More housekeeping
@@ -387,6 +389,8 @@ function Show-ProfileBackup {
 		$deleteallotherdatanowbutnotthis = "$dest\Desktop\$cn\Logs"
 		#Let us copy this file to a better spot. 
 		Copy-Item "$deleteallotherdatanowbutnotthis\Combined-data.xlsx" -Destination "$dest\Logs\$cn"
+		Copy-Item "$deleteallotherdatanowbutnotthis\%computername%_System_Logs.evt" -Destination "$dest\Logs\$cn"
+		Copy-Item "$deleteallotherdatanowbutnotthis\%computername%_Application_Logs.evt" -Destination "$dest\Logs\$cn"
 		#Time to clean up this mess.
 		Remove-Variable ExportFile
 		Remove-Variable ExportFolder
@@ -838,7 +842,8 @@ function Show-ProfileBackup {
 			$result
 		}
 	}
-	$buttonBACKUP_Click={
+	$buttonBACKUP_Click = {
+		
 		backupDirectory
 	}
 	
@@ -854,7 +859,6 @@ function Show-ProfileBackup {
 	$buttonInventory_Click={
 		Get-PSInventory
 	}
-	
 	
 	$buttonCopyToClipboard_Click={
 		#TODO: Place custom script here
@@ -877,6 +881,25 @@ function Show-ProfileBackup {
 		$richtextbox1.ScrollToCaret()
 		$richtextbox1.Focus()
 	}
+	
+	$checkboxSelectAll_CheckedChanged={
+			$checkboxOneNote2016.Checked = $true
+			$checkboxStickyNotes.Checked = $true
+			$checkboxOfficeRibbonAndQAT.Checked = $true
+			$checkboxOutlookSettings.Checked = $true
+			$checkboxOutlookSignature.Checked = $true
+			$checkboxAdobeSignatureSecuri.Checked = $true
+			$checkboxOneDrive.Checked = $true
+			$checkboxCustomDirectory.Checked = $true
+			$checkboxBrowsers.Checked = $true
+			$checkboxQuickparts.Checked = $true
+			$checkboxVideos.Checked = $true
+			$checkboxPictures.Checked = $true
+			$checkboxDownloads.Checked = $true
+			$checkboxDocuments.Checked = $true
+			$checkboxDesktop.Checked = $true
+	}
+	
 	# --End User Generated Script--
 	#----------------------------------------------
 	#region Generated Events
@@ -895,6 +918,7 @@ function Show-ProfileBackup {
 		{
 			$buttonCopyToClipboard.remove_Click($buttonCopyToClipboard_Click)
 			$buttonPrograms.remove_Click($buttonPrograms_Click)
+			$checkboxSelectAll.remove_CheckedChanged($checkboxSelectAll_CheckedChanged)
 			$buttonInventory.remove_Click($buttonInventory_Click)
 			$buttonBACKUP.remove_Click($buttonBACKUP_Click)
 			$buttonPrinters.remove_Click($buttonPrinters_Click)
@@ -1129,6 +1153,7 @@ function Show-ProfileBackup {
 	#
 	# groupbox3
 	#
+	$groupbox3.Controls.Add($checkboxSelectAll)
 	$groupbox3.Controls.Add($checkboxOneNote2016)
 	$groupbox3.Controls.Add($checkboxStickyNotes)
 	$groupbox3.Controls.Add($checkboxAdobeSignatureSecuri)
@@ -1152,6 +1177,17 @@ function Show-ProfileBackup {
 	$groupbox3.TabStop = $False
 	$groupbox3.Text = 'Directories'
 	$groupbox3.UseCompatibleTextRendering = $True
+	#
+	# checkboxSelectAll
+	#
+	$checkboxSelectAll.Location = '164, 19'
+	$checkboxSelectAll.Name = 'checkboxSelectAll'
+	$checkboxSelectAll.Size = '76, 24'
+	$checkboxSelectAll.TabIndex = 44
+	$checkboxSelectAll.Text = 'Select All'
+	$checkboxSelectAll.UseCompatibleTextRendering = $True
+	$checkboxSelectAll.UseVisualStyleBackColor = $True
+	$checkboxSelectAll.add_CheckedChanged($checkboxSelectAll_CheckedChanged)
 	#
 	# checkboxOneNote2016
 	#
@@ -1431,3 +1467,6 @@ function Show-ProfileBackup {
 
 #Call the form
 Show-ProfileBackup | Out-Null
+
+		
+		
