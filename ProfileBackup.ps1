@@ -632,7 +632,7 @@ function Show-ProfileBackup {
 				#Vivaldi Favorites		
 				$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $operaDirectory Large."
+				$richtextbox1.Text += "`nInitializing Vivaldi Favorites Backup. `nThe Vivaldi Favorites Are $operaDirectory Large."
 				Robocopy "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" "$dest\AppData\Local\Vivaldi\User Data\Default\Bookmarks" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				$ProgressBar1.Value = "64"
 				#Firefox Bookmarks
