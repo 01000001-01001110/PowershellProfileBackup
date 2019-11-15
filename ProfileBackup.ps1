@@ -61,10 +61,10 @@ function Show-ProfileBackup {
 	$checkboxDesktop = New-Object 'System.Windows.Forms.CheckBox'
 	$buttonInventory = New-Object 'System.Windows.Forms.Button'
 	$groupbox2 = New-Object 'System.Windows.Forms.GroupBox'
+	$buttonBrowseToLocation = New-Object 'System.Windows.Forms.Button'
 	$textbox1 = New-Object 'System.Windows.Forms.TextBox'
+	$buttonBrowseFromLocation = New-Object 'System.Windows.Forms.Button'
 	$textbox2 = New-Object 'System.Windows.Forms.TextBox'
-	$labelFromLocation = New-Object 'System.Windows.Forms.Label'
-	$labelToLocation = New-Object 'System.Windows.Forms.Label'
 	$buttonBACKUP = New-Object 'System.Windows.Forms.Button'
 	$buttonPrinters = New-Object 'System.Windows.Forms.Button'
 	$richtextbox1 = New-Object 'System.Windows.Forms.RichTextBox'
@@ -111,8 +111,6 @@ function Show-ProfileBackup {
 		#================Code Start===================
 		$path = "$dest\Logs\$cn"
 		$Printservers = $env:computername
-		
-		
 		
 		# Create new Excel workbook
 		$Excel = New-Object -ComObject Excel.Application
@@ -192,7 +190,7 @@ function Show-ProfileBackup {
 		$output = $Path
 		$output += $service
 		$richtextbox1.Text += "`n The location of the printers Excel file is: $output"
-		$Excel.SaveAs($output)
+		Copy-Item "$output" -Destination "$dest\$service"
 		
 		#================Code End=====================
 	}
@@ -365,19 +363,20 @@ function Show-ProfileBackup {
 		$obj | Export-Csv -Path $Path\ComputerName.csv -Encoding UTF8 -NoTypeInformation
 		Write-Host = "Firewalls"
 		$richtextbox1.Text += "Gathering Firewall Settings.`n"
-		Write-Host = "Application Events"
-		$logfile = Get-WmiObject -Class win32_NTEventlogFile  -Filter "logFileName='Application'"
+		Get-NetFirewallRule -PolicyStore ActiveStore | Export-CSV "$Path\Firewall.csv" -NoTypeInfo
+		Write-Host = "Application Events - Not Gathered Due to Secuity Policies."
+		$logfile = Get-WmiObject -Class win32_NTEventlogFile -Filter "logFileName='Application'"
 		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_Application_Logs.evt')
 		Write-Host = "System Events"
-		$logfile = Get-WmiObject -Class win32_NTEventlogFile  -Filter "logFileName='System'"
+		$logfile = Get-WmiObject -Class win32_NTEventlogFile -Filter "logFileName='System'"
 		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_System_Logs.evt')
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		Write-Host = "Processes"
+		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering Current Processes.`n"
 		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		Write-Host = "Service"
+		Write-Host = "Service - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering System Services.`n"
 		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
@@ -421,12 +420,36 @@ function Show-ProfileBackup {
 		ForEach ($Item in $userFolders) { $richtextbox1.Items.Add($Item.Name) }
 	}
 	
+	Function Get-Folder($initialDirectory)
+	{
+		[System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
+		
+		$foldername = New-Object System.Windows.Forms.FolderBrowserDialog
+		$foldername.Description = "Select a folder"
+		$foldername.rootfolder = "MyComputer"
+		
+		if ($foldername.ShowDialog() -eq "OK")
+		{
+			$folder += $foldername.SelectedPath
+		}
+		return $folder
+	}
+	
+	$buttonBrowseFromLocation_Click = {
+		$textbox1.Text = Get-Folder
+	}
+	
+	$buttonBrowseToLocation_Click = {
+		$textbox2.Text = Get-Folder
+	}
 	
 	function backupDirectory
 	{
-		$beginning = Get-Date
-		$source = $textbox1.Text
 		$dest = $textbox2.Text
+		$source = $textbox1.Text
+		Write-Host $source
+		Write-Host $dest
+		$beginning = Get-Date
 		$richtextbox1.Text += "Log Start time: $beginning"
 		$richtextbox1.Text += "`n"
 		$richtextbox1.Text += "`nInitializing Backup Procedure...`n"
@@ -630,9 +653,9 @@ function Show-ProfileBackup {
 				Robocopy "$source\AppData\Roaming\Opera Software" "$dest\AppData\Roaming\Opera Software" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				$ProgressBar1.Value = "64"
 				#Vivaldi Favorites		
-				$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" | Measure-Object Length -s).sum / 1Gb)
+				$VivaldiDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Vivaldi Favorites Backup. `nThe Vivaldi Favorites Are $operaDirectory Large."
+				$richtextbox1.Text += "`nInitializing Vivaldi Favorites Backup. `nThe Opera Favorites Are $VivaldiDirectory Large."
 				Robocopy "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" "$dest\AppData\Local\Vivaldi\User Data\Default\Bookmarks" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				$ProgressBar1.Value = "64"
 				#Firefox Bookmarks
@@ -828,12 +851,14 @@ function Show-ProfileBackup {
 			$statusbar1.Text += "Completed BackUp.. Written by: Alan Newingham."
 			$richtextbox1.Text += "`nCompleted Backup at: $end"
 			control printers
+			Get-Printers
 			$statusbar1.Visible = $true
 			Start-Sleep -Seconds 15
 			$statusbar1.Visible = $false
 			$result = [System.Windows.Forms.MessageBox]::Show('This Operation Completed Successfully!', 'Warning', 'OK', 'Warning')
 			$result
-			Copy-Item "$source\desktop\backuplog.txt" -Destination "$dest\Logs"
+			Copy-Item "$source\desktop\backuplog.txt" -Destination "$dest\Logs.txt"
+			
 		}
 		Else
 		{
@@ -900,6 +925,8 @@ function Show-ProfileBackup {
 			$checkboxDesktop.Checked = $true
 	}
 	
+	
+	
 	# --End User Generated Script--
 	#----------------------------------------------
 	#region Generated Events
@@ -920,6 +947,8 @@ function Show-ProfileBackup {
 			$buttonPrograms.remove_Click($buttonPrograms_Click)
 			$checkboxSelectAll.remove_CheckedChanged($checkboxSelectAll_CheckedChanged)
 			$buttonInventory.remove_Click($buttonInventory_Click)
+			$buttonBrowseToLocation.remove_Click($buttonBrowseToLocation_Click)
+			$buttonBrowseFromLocation.remove_Click($buttonBrowseFromLocation_Click)
 			$buttonBACKUP.remove_Click($buttonBACKUP_Click)
 			$buttonPrinters.remove_Click($buttonPrinters_Click)
 			$richtextbox1.remove_TextChanged($richtextbox1_TextChanged)
@@ -984,7 +1013,7 @@ function Show-ProfileBackup {
 	# labelLog
 	#
 	$labelLog.AutoSize = $True
-	$labelLog.Location = '276, 34'
+	$labelLog.Location = '276, 9'
 	$labelLog.Name = 'labelLog'
 	$labelLog.Size = '26, 17'
 	$labelLog.TabIndex = 47
@@ -1013,7 +1042,7 @@ function Show-ProfileBackup {
 	$Info.Controls.Add($labelWindowsUser)
 	$Info.Controls.Add($label1)
 	$Info.Controls.Add($labelDeviceName)
-	$Info.Location = '11, 425'
+	$Info.Location = '13, 425'
 	$Info.Name = 'Info'
 	$Info.Size = '246, 104'
 	$Info.TabIndex = 44
@@ -1362,51 +1391,53 @@ function Show-ProfileBackup {
 	#
 	# groupbox2
 	#
+	$groupbox2.Controls.Add($buttonBrowseToLocation)
 	$groupbox2.Controls.Add($textbox1)
+	$groupbox2.Controls.Add($buttonBrowseFromLocation)
 	$groupbox2.Controls.Add($textbox2)
-	$groupbox2.Controls.Add($labelFromLocation)
-	$groupbox2.Controls.Add($labelToLocation)
 	$groupbox2.Location = '13, 9'
 	$groupbox2.Name = 'groupbox2'
-	$groupbox2.Size = '245, 76'
+	$groupbox2.Size = '251, 76'
 	$groupbox2.TabIndex = 28
 	$groupbox2.TabStop = $False
 	$groupbox2.Text = 'Locations'
 	$groupbox2.UseCompatibleTextRendering = $True
 	#
+	# buttonBrowseToLocation
+	#
+	$buttonBrowseToLocation.Location = '6, 44'
+	$buttonBrowseToLocation.Name = 'buttonBrowseToLocation'
+	$buttonBrowseToLocation.Size = '130, 23'
+	$buttonBrowseToLocation.TabIndex = 52
+	$buttonBrowseToLocation.Text = 'Browse To Location'
+	$buttonBrowseToLocation.UseCompatibleTextRendering = $True
+	$buttonBrowseToLocation.UseVisualStyleBackColor = $True
+	$buttonBrowseToLocation.add_Click($buttonBrowseToLocation_Click)
+	#
 	# textbox1
 	#
-	$textbox1.Location = '102, 19'
+	$textbox1.Location = '142, 19'
 	$textbox1.Name = 'textbox1'
-	$textbox1.Size = '128, 20'
+	$textbox1.Size = '104, 20'
 	$textbox1.TabIndex = 1
+	#
+	# buttonBrowseFromLocation
+	#
+	$buttonBrowseFromLocation.Location = '6, 17'
+	$buttonBrowseFromLocation.Name = 'buttonBrowseFromLocation'
+	$buttonBrowseFromLocation.Size = '130, 23'
+	$buttonBrowseFromLocation.TabIndex = 51
+	$buttonBrowseFromLocation.Text = 'Browse From Location'
+	$buttonBrowseFromLocation.UseCompatibleTextRendering = $True
+	$buttonBrowseFromLocation.UseVisualStyleBackColor = $True
+	$buttonBrowseFromLocation.add_Click($buttonBrowseFromLocation_Click)
 	#
 	# textbox2
 	#
-	$textbox2.Location = '102, 45'
+	$textbox2.Location = '142, 45'
 	$textbox2.Name = 'textbox2'
-	$textbox2.Size = '128, 20'
+	$textbox2.Size = '104, 20'
 	$textbox2.TabIndex = 2
-	#
-	# labelFromLocation
-	#
-	$labelFromLocation.AutoSize = $True
-	$labelFromLocation.Location = '7, 22'
-	$labelFromLocation.Name = 'labelFromLocation'
-	$labelFromLocation.Size = '77, 17'
-	$labelFromLocation.TabIndex = 11
-	$labelFromLocation.Text = 'From Location'
-	$labelFromLocation.UseCompatibleTextRendering = $True
-	#
-	# labelToLocation
-	#
-	$labelToLocation.AutoSize = $True
-	$labelToLocation.Location = '7, 48'
-	$labelToLocation.Name = 'labelToLocation'
-	$labelToLocation.Size = '63, 17'
-	$labelToLocation.TabIndex = 12
-	$labelToLocation.Text = 'To Location'
-	$labelToLocation.UseCompatibleTextRendering = $True
 	#
 	# buttonBACKUP
 	#
@@ -1437,9 +1468,9 @@ function Show-ProfileBackup {
 	#
 	# richtextbox1
 	#
-	$richtextbox1.Location = '276, 54'
+	$richtextbox1.Location = '276, 28'
 	$richtextbox1.Name = 'richtextbox1'
-	$richtextbox1.Size = '429, 398'
+	$richtextbox1.Size = '429, 424'
 	$richtextbox1.TabIndex = 7
 	$richtextbox1.Text = ''
 	$richtextbox1.add_TextChanged($richtextbox1_TextChanged)
@@ -1467,6 +1498,3 @@ function Show-ProfileBackup {
 
 #Call the form
 Show-ProfileBackup | Out-Null
-
-		
-		
