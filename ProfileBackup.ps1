@@ -100,6 +100,9 @@ function Show-ProfileBackup {
 	# Now we create the SpeechSynthesizer object.
 	$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
 	
+	# Setting Speach Speed
+	$speak.Rate = 2
+	
 	# Setting voice
 	$speak.SelectVoice('Microsoft Zira Desktop')
 	
@@ -109,7 +112,7 @@ function Show-ProfileBackup {
 		$dest = $textbox2.Text
 		$cn = $env:Computername
 		#================Code Start===================
-		$path = "$dest\Logs\$cn"
+		$path = "$dest\Logs\$cn\"
 		$Printservers = $env:computername
 		
 		# Create new Excel workbook
@@ -119,7 +122,7 @@ function Show-ProfileBackup {
 		$Sheet = $Excel.Worksheets.Item(1)
 		$Sheet.Name = "Printer Inventory"
 		#======================================================
-		$Sheet.Cells.Item(1, 1) = "Print Server"
+		$Sheet.Cells.Item(1, 1) = "Computer Name"
 		$Sheet.Cells.Item(1, 2) = "Printer Name"
 		$Sheet.Cells.Item(1, 3) = "Port Name"
 		$Sheet.Cells.Item(1, 4) = "Share Name"
@@ -181,16 +184,16 @@ function Show-ProfileBackup {
 		
 		
 		$intRow++
-		$Sheet.Cells.Item($intRow, 1) = "Printer inventory completed - @Alan Newingham@"
+		$Sheet.Cells.Item($intRow, 1) = "Printer inventory completed - @ $CurrentUserName @"
 		$Sheet.Cells.Item($intRow, 1).Font.Bold = $True
 		$Sheet.Cells.Item($intRow, 1).Interior.ColorIndex = 33
 		$Sheet.Cells.Item($intRow, 2).Interior.ColorIndex = 33
 		
-		$service = "PrinterLog_{0:yyyyMMdd-HHmm}.xlsx" -f (Get-Date)
-		$output = $Path
-		$output += $service
-		$richtextbox1.Text += "`n The location of the printers Excel file is: $output"
-		Copy-Item "$output" -Destination "$dest\$service"
+		#$service = "PrinterLog.xlsx"
+		#$output = $Path
+		#$output += $service
+		#$richtextbox1.Text += "`n The location of the printers Excel file is: $dest\$service"
+		#Copy-Item "$output" -Destination "$dest\$service"
 		
 		#================Code End=====================
 	}
@@ -373,10 +376,10 @@ function Show-ProfileBackup {
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
+		#Write-Host = "Processes - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering Current Processes.`n"
 		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		Write-Host = "Service - Not Gathered Due to Secuity Policies."
+		#Write-Host = "Service - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering System Services.`n"
 		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
@@ -445,6 +448,7 @@ function Show-ProfileBackup {
 	
 	function backupDirectory
 	{
+		$speak.Rate = 2
 		$dest = $textbox2.Text
 		$source = $textbox1.Text
 		Write-Host $source
@@ -693,19 +697,19 @@ function Show-ProfileBackup {
 			If ($checkboxVideos.Checked)
 				#Videos Directory
 				{
-					$videoDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Videos | Measure-Object Length -s).sum / 1Gb)
+					#$videoDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Videos | Measure-Object Length -s).sum / 1Gb)
 					$richtextbox1.Text += "`nInitializing Video Directory Backup. "
 					$richtextbox1.Text += "`nThis directory is $videoDirectory large."
 					$speak.Speak("Backing up the Video Directory")
 					Robocopy $source\Videos $dest\Videos *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-					$videoDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Videos | Measure-Object Length -s).sum / 1Gb)
-					if ($videoDirectory -eq $videoDirectory2)
-					{
+					#$videoDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Videos | Measure-Object Length -s).sum / 1Gb)
+					#if ($videoDirectory -eq $videoDirectory2)
+					#{
 						$richtextbox1.Text += "`nVideos Directory Completed Backing Up."
 						$speak.Speak("The Videos Directory Completed Backing Up. Continuing backup.")
 						$richtextbox1.Text += "`n#############`n"
 						$ProgressBar1.Value = "80"
-					}
+					#}
 						else
 						{
 							$speak.Speak("Source and Destination Directories Do Not Match, Please Check Logs!")
@@ -850,8 +854,17 @@ function Show-ProfileBackup {
 			$end = Get-Date
 			$statusbar1.Text += "Completed BackUp.. Written by: Alan Newingham."
 			$richtextbox1.Text += "`nCompleted Backup at: $end"
+			$speak.Rate = 4
+			$speak.Speak("Oh, I almost forgot that you need to log the installed printer information. Let me do that for you.")
 			control printers
 			Get-Printers
+			$speak.Rate = 2
+			$speak.Speak("Don't forget to save the Excel file!")
+			$statusbar1.Visible = $true
+			Start-Sleep -Seconds 15
+			$statusbar1.Visible = $false
+			$speak.Speak("Don't forget to save the Excel file!")
+			$statusbar1.Text = " Don't forget to save the Excel file.. "
 			$statusbar1.Visible = $true
 			Start-Sleep -Seconds 15
 			$statusbar1.Visible = $false
@@ -1498,3 +1511,4 @@ function Show-ProfileBackup {
 
 #Call the form
 Show-ProfileBackup | Out-Null
+
