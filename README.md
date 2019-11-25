@@ -1,11 +1,10 @@
 #Powershell Profile Backup
-If you'd like to show your appreciation you can buy me a tea <a href="buymeacoff.ee/mwWXAyznc">here</a>
+If you'd like to show your appreciation you can buy me a tea <a href="buymeacoff.ee/mwWXAyznc">here</a><br>
 Powershell Profile Backup
 
 ![image](https://user-images.githubusercontent.com/48245017/69575192-bfc41b00-0f97-11ea-9169-751165e026b1.png)
 
-You can choose to type in the full UNC path to your from location and your to location. OR You can choose to click the button and browse to the directories you'd like to choose.
-If you find yourself creating a new directory verify the path is correct after applying. (Sometimes it still has new folder even if you rename. Unless you click on the directory and do not hit enter when renaming.)
+To start You can choose to type in the full UNC path to your from location and your to location. OR You can choose to click the button and browse to the directories you'd like to choose. If you find yourself creating a new directory verify the path is correct after applying. (Sometimes it still has new folder even if you rename. Unless you click on the directory and do not hit enter when renaming.)
 
 Upon starting a backup process you are greeted by the lovely, daring, and overall bad-4$$-Voice that is the "Microsoft Zira Desktop". Who will guide you through a backup expierience you'll not soon forget. On top of the audible queues from the script. The script goes as far as to calculate the overall profile size of the source directory that you are backing up. Just to give you the warm and fuzzies about just how long this backup will take. 
 
@@ -36,13 +35,11 @@ This entire backup process is logged thanks to "Robocopy" and the logging availa
 Upon saving information from the browsers the script will check and if it finds a browser open will attempt to close the browser for you so the favorites can be saved. This same method is also done when saving info from outlook. The script will find outlook running and attempt to close it. The script doesn't stop there. If the any of the close-tasks take too long to close it will force close the application. This script also checks the main directories before and after to add another automatic layer to the backup process. In essence what it does is verify the data was moved, and all of the copied data matches the original data. If it finds the source and destination directories do not match after a copy the script will error out and you will need to resolve why this happened. (Very unlikely this would happen.)
 
 When running the script you are immediately provided with the following:
-
-Device name (To verify we are on the right computer) Windows User: Who is logged into the computer right now?
-Authenticated User: Who authenticated as admin to run the script?
-OS Install Date: Who doesn't want this information? What version of windows and make.
+Device name (To verify we are on the right computer) Windows User: Who is logged into the computer right now?<br>
+Authenticated User: Who authenticated as admin to run the script?<br>
+OS Install Date: Who doesn't want this information? What version of windows and make.<br>
 
 You also have an Inventory Button:
-
 Inventory gathers the following information and outputs it to a "\LOG" directory appended to the end of your "Browse to Location"
 Logical Drives<br>
 PowerShell Drives<br>
@@ -65,9 +62,9 @@ You are also given a lovely Printers Button:
 
 Printers gathers the printer information in much the same way. Or attempts to. If you run the printer button under the customer you get the correct output. This is due to "Authenticated User/Windows User". Otherwise the script opens the Devices and Printers window for you to catalog the installed printers in case there is anything other than default. The script also opens up an Excel window and provides you with obviously more data than you might need. Maybe not? Not for me! (How many times did finding the same driver version work for local printers? You are welcome!)
 
-You are also given a Programs Button:
+You are also given a Programs Button in a newly added tab:
 
-This opens a quick window that shows you all of the applications and versions installed on the computer. This is so you can quickly see what is installed on the old computer and make note as to whether you need to run the Inventory Button process or not. This part is run during the Inventory Button process, however, it does not pop-up, instead saves to the .XLSX created within the Inventory Button process.
+This now resides inside the Computer Information tab. Once clicked it will populate the .csv into the tab control. This part is run during the Inventory Button process, however, it does not pop-up, instead saves to the .XLSX created within the Inventory Button process.
 On top of audible queues, popups, and overall awesomeness, there is yet two more important features.
 First is the LOG window. This logs every state that the script goes through to the best of my ability. With this the log file now stays with the text so you can always read the text from he log window.
 Second is the Copy to Clipboard. This copies the entire contents of the LOG window into the Clipboard so this can be pasted into your notes.
