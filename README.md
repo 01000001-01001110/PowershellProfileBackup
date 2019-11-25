@@ -1,3 +1,9 @@
+#Powershell Profile Backup
+
+Powershell Profile Backup
+
+![image](https://user-images.githubusercontent.com/48245017/69575192-bfc41b00-0f97-11ea-9169-751165e026b1.png)
+
 You can choose to type in the full UNC path to your from location and your to location. OR You can choose to click the button and browse to the directories you'd like to choose.
 If you find yourself creating a new directory verify the path is correct after applying. (Sometimes it still has new folder even if you rename. Unless you click on the directory and do not hit enter when renaming.)
 
@@ -6,24 +12,24 @@ Upon starting a backup process you are greeted by the lovely, daring, and overal
 The Backup Process: (The meat of this script)
 
 The script starts and ends by logging the start and end time in the LOG window. Based of what you checked any one of the following directories can be backed up.
--Desktop
--Documents
--Videos
--Office Quick Parts
--Documents
--Pictures
--Videos
--Browsers (IE, FF, Chrome, Vivaldi, Opera, and Edge)
--OneNote 2016 if in one of two spots.
--Office Ribbon Data
--Office Quick Access Toolbar settings
--Outlook Settings
--Outlook Signature
--Adobe Signature/Security
--Win10 Sticky Notes
--One Drive, if you must spend time backing up a cloud backup....
--OneDrive-Not-Yet-Syncd-Files (Yeah... find this directory in a search online. This was not an easy find for me.)
--Lastly one Custom Directory of your choosing as long as you have the correct UNC path to the location.
+-Desktop<br>
+-Documents<br>
+-Videos<br>
+-Office Quick Parts<br>
+-Documents<br>
+-Pictures<br>
+-Videos<br>
+-Browsers (IE, FF, Chrome, Vivaldi, Opera, and Edge)<br>
+-OneNote 2016 if in one of two spots.<br>
+-Office Ribbon Data<br>
+-Office Quick Access Toolbar settings<br>
+-Outlook Settings<br>
+-Outlook Signature<br>
+-Adobe Signature/Security<br>
+-Win10 Sticky Notes<br>
+-One Drive, if you must spend time backing up a cloud backup....<br>
+-OneDrive-Not-Yet-Syncd-Files (Yeah... find this directory in a search online. This was not an easy find for me.)<br>
+-Lastly one Custom Directory of your choosing as long as you have the correct UNC path to the location.<br>
 
 This entire backup process is logged thanks to "Robocopy" and the logging available to a temporary text file. This process logs EVERYTHING during the backup as it pertains to the copying of data in the selected directories. Once the log is completed the log file is copied from the temporary location and into the "\LOG" directory appended to the end of your "Browse to Location"
 
@@ -38,21 +44,21 @@ OS Install Date: Who doesn't want this information? What version of windows and 
 You also have an Inventory Button:
 
 Inventory gathers the following information and outputs it to a "\LOG" directory appended to the end of your "Browse to Location"
-Logical Drives
-PowerShell Drives
-Network Drives
-Connected Drives
-OS Information
-BIOS Settings
-IPConfig Information
-Local Administrators
-Computer Name
-Firewall Settings
-Application Events - to an .evt file
-System Events - to an .evt file
-Installed Applications
-Processes
-Services
+Logical Drives<br>
+PowerShell Drives<br>
+Network Drives<br>
+Connected Drives<br>
+OS Information<br>
+BIOS Settings<br>
+IPConfig Information<br>
+Local Administrators<br>
+Computer Name<br>
+Firewall Settings<br>
+Application Events - to an .evt file<br>
+System Events - to an .evt file<br>
+Installed Applications<br>
+Processes<br>
+Services<br>
 The script takes all the non .evt files and combines them into one .XLSX file, then moves it, plus the .evt files into the "\LOG" directory appended to the end of your "Browse to Location"
 
 You are also given a lovely Printers Button:
@@ -68,16 +74,16 @@ Second is the Copy to Clipboard. This copies the entire contents of the LOG wind
 
 What this script doesn't do?
 
-Steal your soul.
-Make you soup.
-Hug you, or touch you in any way.
-Care about your feelings.
-Backup data you or the customer fail to tell it to. Reads minds.
-Log the data in the ticket.
-Calls someones mom to setup a date.
-In fact it will not call anyone.
-Know who you or the customer actually are.
+Steal your soul.<br>
+Make you soup.<br>
+Hug you, or touch you in any way.<br>
+Care about your feelings.<br>
+Backup data you or the customer fail to tell it to. Reads minds.<br>
+Log the data in the ticket.<br>
+Calls someones mom to setup a date.<br>
+In fact it will not call anyone.<br>
+Know who you or the customer actually are.<br>
 
 Why should you care?
 
-You don't have to. Maybe your process is working for you, if so awesome, I am more than happy it does. Mine did not. So I worked on a better solution. This is the evolution of that initial idea a year later. This is not a single person effort as much as it might seem so. Many people have helped contribute to the functionality and data that the script now backs up. In no way could this have ever been possible without everyone's help.
+You don't have to. Maybe your process is working for you, if so awesome, I am more than happy it does.<br> Mine did not. So I worked on a better solution. <br>This is the evolution of that initial idea a year later. <br>This is not a single person effort as much as it might seem so. Many people have helped contribute to the functionality and data that the script now backs up. In no way could this have ever been possible without everyone's help.
