@@ -21,9 +21,8 @@ function Show-ProfileBackup {
 	#region Generated Form Objects
 	#----------------------------------------------
 	[System.Windows.Forms.Application]::EnableVisualStyles()
-	$formProfileBackup011ByAl = New-Object 'System.Windows.Forms.Form'
+	$formProfileBackup013ByAl = New-Object 'System.Windows.Forms.Form'
 	$checkboxMuteVoice = New-Object 'System.Windows.Forms.CheckBox'
-	$checkboxSelectAll = New-Object 'System.Windows.Forms.CheckBox'
 	$tabcontrol1 = New-Object 'System.Windows.Forms.TabControl'
 	$tabpage1 = New-Object 'System.Windows.Forms.TabPage'
 	$richtextbox1 = New-Object 'System.Windows.Forms.RichTextBox'
@@ -46,11 +45,22 @@ function Show-ProfileBackup {
 	$label9 = New-Object 'System.Windows.Forms.Label'
 	$label10 = New-Object 'System.Windows.Forms.Label'
 	$label11 = New-Object 'System.Windows.Forms.Label'
+	$tabpage4 = New-Object 'System.Windows.Forms.TabPage'
+	$buttonResetRepository = New-Object 'System.Windows.Forms.Button'
+	$buttonRepairSCCM = New-Object 'System.Windows.Forms.Button'
+	$buttonRestartSCCM = New-Object 'System.Windows.Forms.Button'
+	$buttonOpenCMTrace = New-Object 'System.Windows.Forms.Button'
+	$buttonSystem = New-Object 'System.Windows.Forms.Button'
+	$buttonDOS = New-Object 'System.Windows.Forms.Button'
+	$buttonPowershell = New-Object 'System.Windows.Forms.Button'
+	$buttonControlPanel = New-Object 'System.Windows.Forms.Button'
 	$buttonInventoryComputer = New-Object 'System.Windows.Forms.Button'
+	$checkboxSelectAll = New-Object 'System.Windows.Forms.CheckBox'
 	$statusbar1 = New-Object 'System.Windows.Forms.StatusBar'
 	$labelCheckDirectoryYouWan = New-Object 'System.Windows.Forms.Label'
 	$progressbar1 = New-Object 'System.Windows.Forms.ProgressBar'
 	$groupbox3 = New-Object 'System.Windows.Forms.GroupBox'
+	$checkboxComprehensiveBackup = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxOneNote2016 = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxStickyNotes = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxAdobeSignatureSecuri = New-Object 'System.Windows.Forms.CheckBox'
@@ -82,7 +92,7 @@ function Show-ProfileBackup {
 	# User Generated Script
 	#----------------------------------------------
 	
-	$formProfileBackup011ByAl_Load={
+	$formProfileBackup013ByAl_Load={
 		#TODO: Initialize Form Controls here
 		
 	}
@@ -111,6 +121,30 @@ function Show-ProfileBackup {
 	
 	# Setting voice
 	$speak.SelectVoice('Microsoft Zira Desktop')
+	
+	
+	function cmTrace
+	{
+		cmd /c "C:\WINDOWS\CCM\CMTrace.exe"
+		$richtextbox1.Text += "`nStarted CMTrace."
+	}
+	function CcmRestart
+	{
+		$salvageRepo = (winmgmt /salvagerepository) | Out-String
+		$richtextbox1.Text += $salvageRepo
+	}
+	function CcmRepair
+	{
+		$verifyRepo = (winmgmt /verifyrepository) | Out-String
+		$richtextbox1.Text += $verifyRepo
+	}
+	
+	function ResetRepo
+	{
+		$ResetRepo1 = (winmgmt /resetRepository) | Out-String
+		$richtextbox1.Text += $ResetRepo1
+	}
+	
 	
 	function Get-Printers
 	{
@@ -339,7 +373,7 @@ function Show-ProfileBackup {
 		Write-Host = "Firewalls"
 		$richtextbox1.Text += "Gathering Firewall Settings.`n"
 		Get-NetFirewallRule -PolicyStore ActiveStore | Export-CSV "$Path\Firewall.csv" -NoTypeInfo
-		Write-Host = "Application Events - Not Gathered Due to Secuity Policies."
+		Write-Host = "Application Events"
 		$logfile = Get-WmiObject -Class win32_NTEventlogFile -Filter "logFileName='Application'"
 		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_Application_Logs.evt')
 		Write-Host = "System Events"
@@ -380,39 +414,6 @@ function Show-ProfileBackup {
 		$a = Get-Content C:\temp\Programs.csv -Delimiter ',' # -Wait
 		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace '"', "" } | Set-Content C:\temp\Programs.csv
 		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace ', ,', "" } | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace ', , 
-, , 
-, , 
-, , 
-, , 
-, , 
-, , ', ""
-		} | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace '", 
-, , 
-', ""
-		} | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace ', , 
-, , 
-, , ', "" } | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace ', , 
-, , 
-, , 
-, , 
-, , 
-, , 
-, , ', "" } | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace ', , 
-, , 
-, , 
-, , 
-, , 
-, , 
-, , ', "" } | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace '.
-,,', "" } | Set-Content C:\temp\Programs.csv
-		(Get-Content C:\temp\Programs.csv) | Foreach-Object { $_ -replace '.
-,,', "" } | Set-Content C:\temp\Programs.csv
 		$RichTextBox2.text += $a
 	}
 	
@@ -545,6 +546,52 @@ function Show-ProfileBackup {
 					}
 			}
 			
+			If ($checkboxComprehensiveBackup.Checked)
+			{
+				$richtextbox1.Text += "`nInitializing Comprehensive Backup."
+				$richtextbox1.Text += "`nThis consists of hidden directories not always used.`n Please be cautious when migrating this data to a new computer."
+				$richtextbox1.Text += "`nCache`nCD Burning`nCookies`nCookies\Low`nCredentialManager`nCryptoKeys`nDevice Metadata Store`ndpapiKeys`nFonts`nNetHood`nPrintHood`nStart Menu Programs`nQuick Launch`nRecent`nSavedGames`nSearches`nStart Menu`nStartup`nSystemCertificates`nTemplates`n`n"
+				#Cache
+				Robocopy "$source\AppData\Local\Microsoft\Windows\Temporary Internet Files" "$dest\AppData\Local\Microsoft\Windows\Temporary Internet Files" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#CD Burning 
+				Robocopy $source\AppData\Local\Microsoft\Windows\Burn\Burn $dest\AppData\Local\Microsoft\Windows\Burn\Burn *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Cookies
+				Robocopy $source\AppData\Local\Microsoft\Windows\INetCookies $dest\AppData\Local\Microsoft\Windows\INetCookies *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Cookies\Low
+				Robocopy $source\AppData\Local\Microsoft\Windows\INetCookies\Low $dest\AppData\Local\Microsoft\Windows\INetCookies\Low *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#CredentialManager
+				Robocopy $source\AppData\Roaming\Microsoft\Credentials $dest\AppData\Roaming\Microsoft\Credentials *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#CryptoKeys
+				Robocopy $source\AppData\Roaming\Microsoft\Crypto $dest\AppData\Roaming\Microsoft\Crypto *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#device Metadata Store
+				Robocopy C:\ProgramData\Microsoft\Windows\DeviceMetadataStore $dest\ProgramData\Microsoft\Windows\DeviceMetadataStore *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#dpapiKeys
+				Robocopy $source\AppData\Roaming\Microsoft\Protect $dest\AppData\Roaming\Microsoft\Protect *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#NetHood
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Network Shortcuts $dest\AppData\Roaming\Microsoft\Windows\Network Shortcuts *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#PrintHood
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Printer Shortcuts $dest\AppData\Roaming\Microsoft\Windows\Printer Shortcuts *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Programs
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Start Menu\Programs $dest\AppData\Roaming\Microsoft\Windows\Start Menu\Programs *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Quick Launch
+				Robocopy $source\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch $dest\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Recent
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Recent $dest\AppData\Roaming\Microsoft\Windows\Recent *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#SavedGames
+				Robocopy $source\Saved Games $dest\Saved Games *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Searches
+				Robocopy $source\Searches $dest\Searches *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Start Menu
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Start Menu $dest\AppData\Roaming\Microsoft\Windows\Start Menu *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Startup
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup $dest\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#SystemCertificates
+				Robocopy $source\AppData\Roaming\Microsoft\SystemCertificates $dest\AppData\Roaming\Microsoft\SystemCertificates *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				#Templates 
+				Robocopy $source\AppData\Roaming\Microsoft\Windows\Templates $dest\AppData\Roaming\Microsoft\Windows\Templates *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				$richtextbox1.Text += "`n Completed Comprehensive Backup. `n"
+			}
+					
 			If ($checkboxDocuments.Checked)
 			{
 				$richtextbox1.Text += "`nInitializing Documents Directory Backup."
@@ -1129,10 +1176,14 @@ function Show-ProfileBackup {
 				$speak.Rate = 4
 				$speak.Speak("Oh, I almost forgot")
 				$speak.Rate = 2
-				$speak.Speak("You need the installed printer information. Let me gather that for you.")
+				$speak.Speak("You need the installed printer information still. While I am at it I will backup your font directory as well. Let me gather that for you now.")
 			}
+			$source = $Texbox1.Text
+			$dest = $Textbox2.Text
 			control printers
 			Get-Printers
+			#Fonts
+			Robocopy C:\Windows\Fonts $dest\Fonts *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 			$statusbar1.Visible = $true
 			Start-Sleep -Seconds 3
 			$statusbar1.Visible = $false
@@ -1144,7 +1195,7 @@ function Show-ProfileBackup {
 			else
 			{
 				$speak.Speak("All selected directories Completed Backing Up. ")
-				$speak.Speak("Don't forget to save the Excel file!")
+				$speak.Speak("Don't forget to save the Printer Excel file!")
 			}
 			$statusbar1.Text = "Don't forget to save the Excel file.. "
 			$statusbar1.Visible = $true
@@ -1219,6 +1270,27 @@ function Show-ProfileBackup {
 		$richtextbox2.Focus()
 	}
 	
+	
+	
+	$tabpage3_Click={
+		#TODO: Place custom script here
+		
+	}
+	
+	$buttonSaveInformation_Click={
+		$FileLocation = 'C:\temp\Programs.csv'
+		Start-Process Excel $FileLocation
+	}
+	
+	$labelLastRestart_Click={
+		#TODO: Place custom script here
+		
+	}
+	
+	$buttonPowershell_Click={
+		Start-Process powershell.exe -Verb runAs
+	}
+	
 	$checkboxSelectAll_CheckedChanged={
 			$checkboxOneNote2016.Checked = $true
 			$checkboxStickyNotes.Checked = $true
@@ -1235,15 +1307,45 @@ function Show-ProfileBackup {
 			$checkboxDownloads.Checked = $true
 			$checkboxDocuments.Checked = $true
 			$checkboxDesktop.Checked = $true
+			$checkboxComprehensiveBackup.Checked = $true
 	}
-	$tabpage3_Click={
+	
+	$buttonControlPanel_Click={
+		Control
+	}
+	
+	$checkboxOneDrive_CheckedChanged={
 		#TODO: Place custom script here
 		
 	}
 	
-	$buttonSaveInformation_Click={
-		$FileLocation = 'C:\temp\Programs.csv'
-		Start-Process Excel $FileLocation
+	$checkboxComprehensiveBackup_CheckedChanged={
+		#TODO: Place custom script here
+		
+	}
+	
+	$buttonResetRepository_Click={
+		ResetRepo
+	}
+	
+	$buttonRepairSCCM_Click={
+		CcmRepair
+	}
+	
+	$buttonRestartSCCM_Click={
+		CcmRestart
+	}
+	
+	$buttonOpenCMTrace_Click={
+		cmTrace
+	}
+	
+	$buttonSystem_Click={
+		Start-Process ms-settings:
+	}
+	
+	$buttonDOS_Click={
+		Start-Process cmd.exe -Verb runAs
 	}
 	
 	# --End User Generated Script--
@@ -1254,7 +1356,7 @@ function Show-ProfileBackup {
 	$Form_StateCorrection_Load=
 	{
 		#Correct the initial state of the form to prevent the .Net maximized form issue
-		$formProfileBackup011ByAl.WindowState = $InitialFormWindowState
+		$formProfileBackup013ByAl.WindowState = $InitialFormWindowState
 	}
 	
 	$Form_Cleanup_FormClosed=
@@ -1265,16 +1367,28 @@ function Show-ProfileBackup {
 			$richtextbox1.remove_TextChanged($richtextbox1_TextChanged)
 			$buttonCopyToClipboard.remove_Click($buttonCopyToClipboard_Click)
 			$buttonSaveInformation.remove_Click($buttonSaveInformation_Click)
+			$labelLastRestart.remove_Click($labelLastRestart_Click)
 			$buttonListInstalledProgram.remove_Click($buttonListInstalledProgram_Click)
 			$tabpage3.remove_Click($tabpage3_Click)
+			$buttonResetRepository.remove_Click($buttonResetRepository_Click)
+			$buttonRepairSCCM.remove_Click($buttonRepairSCCM_Click)
+			$buttonRestartSCCM.remove_Click($buttonRestartSCCM_Click)
+			$buttonOpenCMTrace.remove_Click($buttonOpenCMTrace_Click)
+			$buttonSystem.remove_Click($buttonSystem_Click)
+			$buttonDOS.remove_Click($buttonDOS_Click)
+			$buttonPowershell.remove_Click($buttonPowershell_Click)
+			$buttonControlPanel.remove_Click($buttonControlPanel_Click)
 			$buttonInventoryComputer.remove_Click($buttonInventoryComputer_Click)
+			$checkboxSelectAll.remove_CheckedChanged($checkboxSelectAll_CheckedChanged)
+			$checkboxComprehensiveBackup.remove_CheckedChanged($checkboxComprehensiveBackup_CheckedChanged)
+			$checkboxOneDrive.remove_CheckedChanged($checkboxOneDrive_CheckedChanged)
 			$buttonBrowseDestination.remove_Click($buttonBrowseDestination_Click)
 			$buttonBrowseSource.remove_Click($buttonBrowseSource_Click)
 			$buttonBACKUP.remove_Click($buttonBACKUP_Click)
 			$buttonDisplayPrinters.remove_Click($buttonDisplayPrinters_Click)
-			$formProfileBackup011ByAl.remove_Load($formProfileBackup011ByAl_Load)
-			$formProfileBackup011ByAl.remove_Load($Form_StateCorrection_Load)
-			$formProfileBackup011ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
+			$formProfileBackup013ByAl.remove_Load($formProfileBackup013ByAl_Load)
+			$formProfileBackup013ByAl.remove_Load($Form_StateCorrection_Load)
+			$formProfileBackup013ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
 		}
 		catch { Out-Null <# Prevent PSScriptAnalyzer warning #> }
 	}
@@ -1283,32 +1397,33 @@ function Show-ProfileBackup {
 	#----------------------------------------------
 	#region Generated Form Code
 	#----------------------------------------------
-	$formProfileBackup011ByAl.SuspendLayout()
+	$formProfileBackup013ByAl.SuspendLayout()
 	$groupbox3.SuspendLayout()
 	$groupbox2.SuspendLayout()
 	$tabcontrol1.SuspendLayout()
 	$tabpage1.SuspendLayout()
 	$tabpage3.SuspendLayout()
+	$tabpage4.SuspendLayout()
 	#
-	# formProfileBackup011ByAl
+	# formProfileBackup013ByAl
 	#
-	$formProfileBackup011ByAl.Controls.Add($checkboxMuteVoice)
-	$formProfileBackup011ByAl.Controls.Add($checkboxSelectAll)
-	$formProfileBackup011ByAl.Controls.Add($tabcontrol1)
-	$formProfileBackup011ByAl.Controls.Add($buttonInventoryComputer)
-	$formProfileBackup011ByAl.Controls.Add($statusbar1)
-	$formProfileBackup011ByAl.Controls.Add($labelCheckDirectoryYouWan)
-	$formProfileBackup011ByAl.Controls.Add($progressbar1)
-	$formProfileBackup011ByAl.Controls.Add($groupbox3)
-	$formProfileBackup011ByAl.Controls.Add($groupbox2)
-	$formProfileBackup011ByAl.Controls.Add($buttonBACKUP)
-	$formProfileBackup011ByAl.Controls.Add($buttonDisplayPrinters)
-	$formProfileBackup011ByAl.AutoScaleDimensions = '6, 13'
-	$formProfileBackup011ByAl.AutoScaleMode = 'Font'
-	$formProfileBackup011ByAl.BackgroundImageLayout = 'Center'
-	$formProfileBackup011ByAl.ClientSize = '711, 557'
+	$formProfileBackup013ByAl.Controls.Add($checkboxMuteVoice)
+	$formProfileBackup013ByAl.Controls.Add($tabcontrol1)
+	$formProfileBackup013ByAl.Controls.Add($buttonInventoryComputer)
+	$formProfileBackup013ByAl.Controls.Add($checkboxSelectAll)
+	$formProfileBackup013ByAl.Controls.Add($statusbar1)
+	$formProfileBackup013ByAl.Controls.Add($labelCheckDirectoryYouWan)
+	$formProfileBackup013ByAl.Controls.Add($progressbar1)
+	$formProfileBackup013ByAl.Controls.Add($groupbox3)
+	$formProfileBackup013ByAl.Controls.Add($groupbox2)
+	$formProfileBackup013ByAl.Controls.Add($buttonBACKUP)
+	$formProfileBackup013ByAl.Controls.Add($buttonDisplayPrinters)
+	$formProfileBackup013ByAl.AutoScaleDimensions = '6, 13'
+	$formProfileBackup013ByAl.AutoScaleMode = 'Font'
+	$formProfileBackup013ByAl.BackgroundImageLayout = 'Center'
+	$formProfileBackup013ByAl.ClientSize = '711, 557'
 	#region Binary Data
-	$formProfileBackup011ByAl.Icon = [System.Convert]::FromBase64String('
+	$formProfileBackup013ByAl.Icon = [System.Convert]::FromBase64String('
 AAABAAEA4eEAAAEAIABMMwMAFgAAACgAAADhAAAAwgEAAAEAIAAAAAAABBcDAAAAAAAAAAAAAAAA
 AAAAAAAAAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/
 AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AQEB/wICAv8A
@@ -4991,13 +5106,13 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAA=')
 	#endregion
-	$formProfileBackup011ByAl.Name = 'formProfileBackup011ByAl'
-	$formProfileBackup011ByAl.Text = 'Profile Backup 0.1.1 - By: Alan Newingham'
-	$formProfileBackup011ByAl.add_Load($formProfileBackup011ByAl_Load)
+	$formProfileBackup013ByAl.Name = 'formProfileBackup013ByAl'
+	$formProfileBackup013ByAl.Text = 'Profile Backup 0.1.3 - By: Alan Newingham'
+	$formProfileBackup013ByAl.add_Load($formProfileBackup013ByAl_Load)
 	#
 	# checkboxMuteVoice
 	#
-	$checkboxMuteVoice.Location = '102, 91'
+	$checkboxMuteVoice.Location = '161, 91'
 	$checkboxMuteVoice.Name = 'checkboxMuteVoice'
 	$checkboxMuteVoice.Size = '82, 24'
 	$checkboxMuteVoice.TabIndex = 53
@@ -5005,20 +5120,11 @@ AAA=')
 	$checkboxMuteVoice.UseCompatibleTextRendering = $True
 	$checkboxMuteVoice.UseVisualStyleBackColor = $True
 	#
-	# checkboxSelectAll
-	#
-	$checkboxSelectAll.Location = '20, 91'
-	$checkboxSelectAll.Name = 'checkboxSelectAll'
-	$checkboxSelectAll.Size = '76, 24'
-	$checkboxSelectAll.TabIndex = 52
-	$checkboxSelectAll.Text = 'Select All'
-	$checkboxSelectAll.UseCompatibleTextRendering = $True
-	$checkboxSelectAll.UseVisualStyleBackColor = $True
-	#
 	# tabcontrol1
 	#
 	$tabcontrol1.Controls.Add($tabpage1)
 	$tabcontrol1.Controls.Add($tabpage3)
+	$tabcontrol1.Controls.Add($tabpage4)
 	$tabcontrol1.Location = '276, 53'
 	$tabcontrol1.Name = 'tabcontrol1'
 	$tabcontrol1.SelectedIndex = 0
@@ -5093,7 +5199,7 @@ AAA=')
 	$buttonSaveInformation.Font = 'Arial, 9pt, style=Bold'
 	$buttonSaveInformation.Location = '253, 82'
 	$buttonSaveInformation.Name = 'buttonSaveInformation'
-	$buttonSaveInformation.Size = '163, 45'
+	$buttonSaveInformation.Size = '168, 45'
 	$buttonSaveInformation.TabIndex = 52
 	$buttonSaveInformation.Text = 'Save Information'
 	$buttonSaveInformation.UseCompatibleTextRendering = $True
@@ -5103,7 +5209,7 @@ AAA=')
 	# labelReboot
 	#
 	$labelReboot.AutoSize = $True
-	$labelReboot.Location = '118, 107'
+	$labelReboot.Location = '118, 76'
 	$labelReboot.Name = 'labelReboot'
 	$labelReboot.Size = '47, 17'
 	$labelReboot.TabIndex = 69
@@ -5113,18 +5219,19 @@ AAA=')
 	# labelLastRestart
 	#
 	$labelLastRestart.AutoSize = $True
-	$labelLastRestart.Location = '8, 107'
+	$labelLastRestart.Location = '8, 76'
 	$labelLastRestart.Name = 'labelLastRestart'
 	$labelLastRestart.Size = '71, 17'
 	$labelLastRestart.TabIndex = 68
 	$labelLastRestart.Text = 'Last Restart: '
 	$labelLastRestart.UseCompatibleTextRendering = $True
+	$labelLastRestart.add_Click($labelLastRestart_Click)
 	#
 	# richtextbox2
 	#
-	$richtextbox2.Location = '3, 131'
+	$richtextbox2.Location = '-4, 132'
 	$richtextbox2.Name = 'richtextbox2'
-	$richtextbox2.Size = '423, 301'
+	$richtextbox2.Size = '430, 301'
 	$richtextbox2.TabIndex = 67
 	$richtextbox2.Text = ''
 	#
@@ -5154,7 +5261,7 @@ AAA=')
 	# labelOperatingSystem
 	#
 	$labelOperatingSystem.AutoSize = $True
-	$labelOperatingSystem.Location = '6, 60'
+	$labelOperatingSystem.Location = '8, 59'
 	$labelOperatingSystem.Name = 'labelOperatingSystem'
 	$labelOperatingSystem.Size = '98, 17'
 	$labelOperatingSystem.TabIndex = 65
@@ -5174,7 +5281,7 @@ AAA=')
 	# label4
 	#
 	$label4.AutoSize = $True
-	$label4.Location = '6, 77'
+	$label4.Location = '8, 108'
 	$label4.Name = 'label4'
 	$label4.Size = '83, 17'
 	$label4.TabIndex = 61
@@ -5224,7 +5331,7 @@ AAA=')
 	# label8
 	#
 	$label8.AutoSize = $True
-	$label8.Location = '118, 77'
+	$label8.Location = '118, 108'
 	$label8.Name = 'label8'
 	$label8.Size = '53, 17'
 	$label8.TabIndex = 56
@@ -5261,6 +5368,112 @@ AAA=')
 	$label11.Text = 'Device Name:'
 	$label11.UseCompatibleTextRendering = $True
 	#
+	# tabpage4
+	#
+	$tabpage4.Controls.Add($buttonResetRepository)
+	$tabpage4.Controls.Add($buttonRepairSCCM)
+	$tabpage4.Controls.Add($buttonRestartSCCM)
+	$tabpage4.Controls.Add($buttonOpenCMTrace)
+	$tabpage4.Controls.Add($buttonSystem)
+	$tabpage4.Controls.Add($buttonDOS)
+	$tabpage4.Controls.Add($buttonPowershell)
+	$tabpage4.Controls.Add($buttonControlPanel)
+	$tabpage4.Location = '4, 22'
+	$tabpage4.Name = 'tabpage4'
+	$tabpage4.Padding = '3, 3, 3, 3'
+	$tabpage4.Size = '427, 433'
+	$tabpage4.TabIndex = 3
+	$tabpage4.Text = 'System Tools'
+	$tabpage4.UseVisualStyleBackColor = $True
+	#
+	# buttonResetRepository
+	#
+	$buttonResetRepository.Location = '22, 218'
+	$buttonResetRepository.Name = 'buttonResetRepository'
+	$buttonResetRepository.Size = '120, 23'
+	$buttonResetRepository.TabIndex = 7
+	$buttonResetRepository.Text = 'Reset Repository'
+	$buttonResetRepository.UseCompatibleTextRendering = $True
+	$buttonResetRepository.UseVisualStyleBackColor = $True
+	$buttonResetRepository.add_Click($buttonResetRepository_Click)
+	#
+	# buttonRepairSCCM
+	#
+	$buttonRepairSCCM.Location = '22, 189'
+	$buttonRepairSCCM.Name = 'buttonRepairSCCM'
+	$buttonRepairSCCM.Size = '120, 23'
+	$buttonRepairSCCM.TabIndex = 6
+	$buttonRepairSCCM.Text = 'Repair SCCM'
+	$buttonRepairSCCM.UseCompatibleTextRendering = $True
+	$buttonRepairSCCM.UseVisualStyleBackColor = $True
+	$buttonRepairSCCM.add_Click($buttonRepairSCCM_Click)
+	#
+	# buttonRestartSCCM
+	#
+	$buttonRestartSCCM.Location = '22, 162'
+	$buttonRestartSCCM.Name = 'buttonRestartSCCM'
+	$buttonRestartSCCM.Size = '120, 23'
+	$buttonRestartSCCM.TabIndex = 5
+	$buttonRestartSCCM.Text = 'Restart SCCM'
+	$buttonRestartSCCM.UseCompatibleTextRendering = $True
+	$buttonRestartSCCM.UseVisualStyleBackColor = $True
+	$buttonRestartSCCM.add_Click($buttonRestartSCCM_Click)
+	#
+	# buttonOpenCMTrace
+	#
+	$buttonOpenCMTrace.Location = '22, 133'
+	$buttonOpenCMTrace.Name = 'buttonOpenCMTrace'
+	$buttonOpenCMTrace.Size = '120, 23'
+	$buttonOpenCMTrace.TabIndex = 4
+	$buttonOpenCMTrace.Text = 'Open CM Trace'
+	$buttonOpenCMTrace.UseCompatibleTextRendering = $True
+	$buttonOpenCMTrace.UseVisualStyleBackColor = $True
+	$buttonOpenCMTrace.add_Click($buttonOpenCMTrace_Click)
+	#
+	# buttonSystem
+	#
+	$buttonSystem.Location = '22, 104'
+	$buttonSystem.Name = 'buttonSystem'
+	$buttonSystem.Size = '120, 23'
+	$buttonSystem.TabIndex = 3
+	$buttonSystem.Text = 'System'
+	$buttonSystem.UseCompatibleTextRendering = $True
+	$buttonSystem.UseVisualStyleBackColor = $True
+	$buttonSystem.add_Click($buttonSystem_Click)
+	#
+	# buttonDOS
+	#
+	$buttonDOS.Location = '22, 75'
+	$buttonDOS.Name = 'buttonDOS'
+	$buttonDOS.Size = '120, 23'
+	$buttonDOS.TabIndex = 2
+	$buttonDOS.Text = 'DOS'
+	$buttonDOS.UseCompatibleTextRendering = $True
+	$buttonDOS.UseVisualStyleBackColor = $True
+	$buttonDOS.add_Click($buttonDOS_Click)
+	#
+	# buttonPowershell
+	#
+	$buttonPowershell.Location = '22, 46'
+	$buttonPowershell.Name = 'buttonPowershell'
+	$buttonPowershell.Size = '120, 23'
+	$buttonPowershell.TabIndex = 1
+	$buttonPowershell.Text = 'Powershell'
+	$buttonPowershell.UseCompatibleTextRendering = $True
+	$buttonPowershell.UseVisualStyleBackColor = $True
+	$buttonPowershell.add_Click($buttonPowershell_Click)
+	#
+	# buttonControlPanel
+	#
+	$buttonControlPanel.Location = '22, 16'
+	$buttonControlPanel.Name = 'buttonControlPanel'
+	$buttonControlPanel.Size = '120, 23'
+	$buttonControlPanel.TabIndex = 0
+	$buttonControlPanel.Text = 'Control Panel'
+	$buttonControlPanel.UseCompatibleTextRendering = $True
+	$buttonControlPanel.UseVisualStyleBackColor = $True
+	$buttonControlPanel.add_Click($buttonControlPanel_Click)
+	#
 	# buttonInventoryComputer
 	#
 	$buttonInventoryComputer.BackColor = 'MenuHighlight'
@@ -5273,6 +5486,17 @@ AAA=')
 	$buttonInventoryComputer.UseCompatibleTextRendering = $True
 	$buttonInventoryComputer.UseVisualStyleBackColor = $False
 	$buttonInventoryComputer.add_Click($buttonInventoryComputer_Click)
+	#
+	# checkboxSelectAll
+	#
+	$checkboxSelectAll.Location = '19, 91'
+	$checkboxSelectAll.Name = 'checkboxSelectAll'
+	$checkboxSelectAll.Size = '76, 24'
+	$checkboxSelectAll.TabIndex = 52
+	$checkboxSelectAll.Text = 'Select All'
+	$checkboxSelectAll.UseCompatibleTextRendering = $True
+	$checkboxSelectAll.UseVisualStyleBackColor = $True
+	$checkboxSelectAll.add_CheckedChanged($checkboxSelectAll_CheckedChanged)
 	#
 	# statusbar1
 	#
@@ -5299,6 +5523,7 @@ AAA=')
 	#
 	# groupbox3
 	#
+	$groupbox3.Controls.Add($checkboxComprehensiveBackup)
 	$groupbox3.Controls.Add($checkboxOneNote2016)
 	$groupbox3.Controls.Add($checkboxStickyNotes)
 	$groupbox3.Controls.Add($checkboxAdobeSignatureSecuri)
@@ -5323,9 +5548,20 @@ AAA=')
 	$groupbox3.Text = 'Directories'
 	$groupbox3.UseCompatibleTextRendering = $True
 	#
+	# checkboxComprehensiveBackup
+	#
+	$checkboxComprehensiveBackup.Location = '5, 244'
+	$checkboxComprehensiveBackup.Name = 'checkboxComprehensiveBackup'
+	$checkboxComprehensiveBackup.Size = '152, 24'
+	$checkboxComprehensiveBackup.TabIndex = 44
+	$checkboxComprehensiveBackup.Text = 'Comprehensive Backup'
+	$checkboxComprehensiveBackup.UseCompatibleTextRendering = $True
+	$checkboxComprehensiveBackup.UseVisualStyleBackColor = $True
+	$checkboxComprehensiveBackup.add_CheckedChanged($checkboxComprehensiveBackup_CheckedChanged)
+	#
 	# checkboxOneNote2016
 	#
-	$checkboxOneNote2016.Location = '6, 162'
+	$checkboxOneNote2016.Location = '5, 152'
 	$checkboxOneNote2016.Name = 'checkboxOneNote2016'
 	$checkboxOneNote2016.Size = '122, 14'
 	$checkboxOneNote2016.TabIndex = 43
@@ -5335,7 +5571,7 @@ AAA=')
 	#
 	# checkboxStickyNotes
 	#
-	$checkboxStickyNotes.Location = '6, 256'
+	$checkboxStickyNotes.Location = '5, 264'
 	$checkboxStickyNotes.Name = 'checkboxStickyNotes'
 	$checkboxStickyNotes.Size = '122, 24'
 	$checkboxStickyNotes.TabIndex = 42
@@ -5345,7 +5581,7 @@ AAA=')
 	#
 	# checkboxAdobeSignatureSecuri
 	#
-	$checkboxAdobeSignatureSecuri.Location = '6, 234'
+	$checkboxAdobeSignatureSecuri.Location = '5, 224'
 	$checkboxAdobeSignatureSecuri.Name = 'checkboxAdobeSignatureSecuri'
 	$checkboxAdobeSignatureSecuri.Size = '164, 24'
 	$checkboxAdobeSignatureSecuri.TabIndex = 41
@@ -5355,7 +5591,7 @@ AAA=')
 	#
 	# checkboxOfficeRibbonAndQAT
 	#
-	$checkboxOfficeRibbonAndQAT.Location = '6, 178'
+	$checkboxOfficeRibbonAndQAT.Location = '5, 168'
 	$checkboxOfficeRibbonAndQAT.Name = 'checkboxOfficeRibbonAndQAT'
 	$checkboxOfficeRibbonAndQAT.Size = '152, 21'
 	$checkboxOfficeRibbonAndQAT.TabIndex = 40
@@ -5365,7 +5601,7 @@ AAA=')
 	#
 	# checkboxOutlookSettings
 	#
-	$checkboxOutlookSettings.Location = '6, 195'
+	$checkboxOutlookSettings.Location = '5, 185'
 	$checkboxOutlookSettings.Name = 'checkboxOutlookSettings'
 	$checkboxOutlookSettings.Size = '106, 24'
 	$checkboxOutlookSettings.TabIndex = 39
@@ -5375,7 +5611,7 @@ AAA=')
 	#
 	# checkboxOutlookSignature
 	#
-	$checkboxOutlookSignature.Location = '6, 214'
+	$checkboxOutlookSignature.Location = '5, 204'
 	$checkboxOutlookSignature.Name = 'checkboxOutlookSignature'
 	$checkboxOutlookSignature.Size = '122, 24'
 	$checkboxOutlookSignature.TabIndex = 38
@@ -5385,17 +5621,18 @@ AAA=')
 	#
 	# checkboxOneDrive
 	#
-	$checkboxOneDrive.Location = '6, 278'
+	$checkboxOneDrive.Location = '5, 285'
 	$checkboxOneDrive.Name = 'checkboxOneDrive'
 	$checkboxOneDrive.Size = '104, 24'
 	$checkboxOneDrive.TabIndex = 37
 	$checkboxOneDrive.Text = 'OneDrive'
 	$checkboxOneDrive.UseCompatibleTextRendering = $True
 	$checkboxOneDrive.UseVisualStyleBackColor = $True
+	$checkboxOneDrive.add_CheckedChanged($checkboxOneDrive_CheckedChanged)
 	#
 	# checkboxCustomDirectory
 	#
-	$checkboxCustomDirectory.Location = '6, 300'
+	$checkboxCustomDirectory.Location = '5, 305'
 	$checkboxCustomDirectory.Name = 'checkboxCustomDirectory'
 	$checkboxCustomDirectory.Size = '122, 24'
 	$checkboxCustomDirectory.TabIndex = 36
@@ -5406,14 +5643,14 @@ AAA=')
 	#
 	# textbox7
 	#
-	$textbox7.Location = '129, 300'
+	$textbox7.Location = '128, 305'
 	$textbox7.Name = 'textbox7'
 	$textbox7.Size = '100, 20'
 	$textbox7.TabIndex = 35
 	#
 	# checkboxQuickparts
 	#
-	$checkboxQuickparts.Location = '6, 81'
+	$checkboxQuickparts.Location = '5, 71'
 	$checkboxQuickparts.Name = 'checkboxQuickparts'
 	$checkboxQuickparts.Size = '109, 24'
 	$checkboxQuickparts.TabIndex = 34
@@ -5423,7 +5660,7 @@ AAA=')
 	#
 	# checkboxBrowsers
 	#
-	$checkboxBrowsers.Location = '6, 139'
+	$checkboxBrowsers.Location = '5, 129'
 	$checkboxBrowsers.Name = 'checkboxBrowsers'
 	$checkboxBrowsers.Size = '104, 24'
 	$checkboxBrowsers.TabIndex = 33
@@ -5433,7 +5670,7 @@ AAA=')
 	#
 	# checkboxVideos
 	#
-	$checkboxVideos.Location = '6, 62'
+	$checkboxVideos.Location = '5, 52'
 	$checkboxVideos.Name = 'checkboxVideos'
 	$checkboxVideos.Size = '104, 24'
 	$checkboxVideos.TabIndex = 32
@@ -5443,7 +5680,7 @@ AAA=')
 	#
 	# checkboxPictures
 	#
-	$checkboxPictures.Location = '6, 120'
+	$checkboxPictures.Location = '5, 110'
 	$checkboxPictures.Name = 'checkboxPictures'
 	$checkboxPictures.Size = '104, 24'
 	$checkboxPictures.TabIndex = 31
@@ -5453,7 +5690,7 @@ AAA=')
 	#
 	# checkboxDocuments
 	#
-	$checkboxDocuments.Location = '6, 101'
+	$checkboxDocuments.Location = '5, 91'
 	$checkboxDocuments.Name = 'checkboxDocuments'
 	$checkboxDocuments.Size = '104, 24'
 	$checkboxDocuments.TabIndex = 30
@@ -5463,7 +5700,7 @@ AAA=')
 	#
 	# checkboxDownloads
 	#
-	$checkboxDownloads.Location = '6, 43'
+	$checkboxDownloads.Location = '5, 33'
 	$checkboxDownloads.Name = 'checkboxDownloads'
 	$checkboxDownloads.Size = '104, 24'
 	$checkboxDownloads.TabIndex = 29
@@ -5473,7 +5710,7 @@ AAA=')
 	#
 	# checkboxDesktop
 	#
-	$checkboxDesktop.Location = '6, 24'
+	$checkboxDesktop.Location = '5, 14'
 	$checkboxDesktop.Name = 'checkboxDesktop'
 	$checkboxDesktop.Size = '104, 27'
 	$checkboxDesktop.TabIndex = 28
@@ -5560,24 +5797,25 @@ AAA=')
 	#
 	# tooltip1
 	#
+	$tabpage4.ResumeLayout()
 	$tabpage3.ResumeLayout()
 	$tabpage1.ResumeLayout()
 	$tabcontrol1.ResumeLayout()
 	$groupbox2.ResumeLayout()
 	$groupbox3.ResumeLayout()
-	$formProfileBackup011ByAl.ResumeLayout()
+	$formProfileBackup013ByAl.ResumeLayout()
 	#endregion Generated Form Code
 
 	#----------------------------------------------
 
 	#Save the initial state of the form
-	$InitialFormWindowState = $formProfileBackup011ByAl.WindowState
+	$InitialFormWindowState = $formProfileBackup013ByAl.WindowState
 	#Init the OnLoad event to correct the initial state of the form
-	$formProfileBackup011ByAl.add_Load($Form_StateCorrection_Load)
+	$formProfileBackup013ByAl.add_Load($Form_StateCorrection_Load)
 	#Clean up the control events
-	$formProfileBackup011ByAl.add_FormClosed($Form_Cleanup_FormClosed)
+	$formProfileBackup013ByAl.add_FormClosed($Form_Cleanup_FormClosed)
 	#Show the Form
-	return $formProfileBackup011ByAl.ShowDialog()
+	return $formProfileBackup013ByAl.ShowDialog()
 
 } #End Function
 
