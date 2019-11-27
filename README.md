@@ -10,7 +10,26 @@ Upon starting a backup process you are greeted by the lovely, daring, and overal
 
 The Backup Process: (The meat of this script)
 
-The script starts and ends by logging the start and end time in the LOG window. Based of what you checked any one of the following directories can be backed up.
+The script starts and ends by logging the start and end time in the LOG window. Based of what you checked any of the following directories can be backed up.
+-Cache Directory<br>
+-CD Burning<br>
+-Cookies<br>
+-Cookies\Low
+-CredentialManager<br>
+-CryptoKeys<br>
+-Device Metadata Store<br>
+-dpapiKeys<br>
+-NetHood<br>
+-PrintHood<br>
+-Start Menu Programs<br>
+-Quick Launch<br>
+-Recent<br>
+-SavedGames<br>
+-Searches<br>
+-Start Menu<br>
+-Startup<br>
+-SystemCertificates<br>
+-Templates<br>
 -Desktop<br>
 -Documents<br>
 -Videos<br>
