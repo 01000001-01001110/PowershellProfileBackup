@@ -4,7 +4,7 @@ If you'd like to show your appreciation you can buy me a tea <a href="buymeacoff
 
 ![image](https://user-images.githubusercontent.com/48245017/69575192-bfc41b00-0f97-11ea-9169-751165e026b1.png)
 
-Profile Backup Script:
+<pre>Profile Backup Script:
 You can choose to type in the full UNC path to your from location and your to location. OR You can choose to click the button and browse to the directories you'd like to choose.
 
 If creating a new directory verify the path is correct after applying. (Sometimes it still has new folder even if you rename. Unless you click on the directory and do not hit enter when renaming.) Upon starting a backup process you are greeted by the lovely, daring, and overall badA-Voice that is the "Microsoft Zira Desktop" Screams, "WOOOOOOOO", Not really. However, the audible queues from the script help guide you and the customer on a backup journey you will never forget. On top of the audible queues from the script continues to goe as far as to calculate the overall profile size of the source directory that you are backing up. Just to give you the warm and fuzzies about just how long this backup will take. With the audible queues from the script you'd think that would be enough?
@@ -139,4 +139,4 @@ Calls someones mom to setup a date.
 In fact it will not call anyone.
 Know who you or the customer actually are.
 Why should you care?
-You don't have to. Maybe your process is working for you, if so awesome, I am more than happy it does. Mine did not. The fact that this process is still a manual one still boggles my mind. When I started we were handed a two page document and told to follow the process off this document. No... That's being setup for failure, not success. So I worked on a better solution. This is the evolution of the initial idea. A year later. This is not a single person effort as much as it might seem so. Many people have helped contribute to the functionality and data that the script now backs up. In no way could this have ever been possible without everyone's help.
+You don't have to. Maybe your process is working for you, if so awesome, I am more than happy it does. Mine did not. The fact that this process is still a manual one still boggles my mind. When I started we were handed a two page document and told to follow the process off this document. No... That's being setup for failure, not success. So I worked on a better solution. This is the evolution of the initial idea. A year later. This is not a single person effort as much as it might seem so. Many people have helped contribute to the functionality and data that the script now backs up. In no way could this have ever been possible without everyone's help.</pre>
