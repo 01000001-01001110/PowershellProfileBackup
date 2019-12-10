@@ -820,7 +820,7 @@ function Show-ProfileBackup {
 				$chromeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Google\Chrome\User Data\Default" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
 				$richtextbox1.Text += "`nInitializing Chrome Bookmarks Backup. `nThe Chrome Bookmarks are $chromeDirectory large."
-				Robocopy "$source\AppData\Local\Google\Chrome\User Data\Default" "$destAppData\AppData\Local\Google\Chrome\User Data\Default" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				Robocopy "$source\AppData\Local\Google\Chrome\User Data\Default" "$destAppData\AppData\Local\Google\Chrome\User Data\Default" "Bookmarks.bak" "Custom Dictionary.txt" /S /LOG+:$source\desktop\backuplog.txt
 				updateTextBox2
 				$ProgressBar1.Value = "63"
 				#Opera Favorites		
@@ -1200,12 +1200,14 @@ function Show-ProfileBackup {
 				$speak.Rate = 4
 				$speak.Speak("Oh, I almost forgot")
 				$speak.Rate = 2
-				$speak.Speak("You need the installed printer information still. While I am at it I will backup your font directory as well. Let me gather that for you now.")
+				$speak.Speak("You need the installed printer information still. While I am at it I will backup your font directory, and the custom dictionary as well. Let me gather that for you now.")
 			}
 			$source = $Texbox1.Text
 			$dest = $Textbox2.Text
 			control printers
 			Get-Printers
+			#Custom Dictionary
+			Robocopy $source\AppData\Roaming\Microsoft\UProof $dest\AppData\Roaming\Microsoft\UProof *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 			#Fonts
 			Robocopy C:\Windows\Fonts $dest\Fonts *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 			$statusbar1.Visible = $true
