@@ -540,7 +540,7 @@ function Show-ProfileBackup {
 				$desktopDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Desktop | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nThe Desktop Directory is $desktopDirectory."
 				Robocopy $source\Desktop $dest\Desktop *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$desktopDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Desktop | Measure-Object Length -s).sum / 1Gb)
 				if ($desktopDirectory -eq $desktopDirectory2)
 				{
@@ -630,7 +630,7 @@ function Show-ProfileBackup {
 				$documentsDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Documents | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nThe Documents Directory is $documentsDirectory."
 				Robocopy $source\Documents $dest\Documents *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$documentsDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Documents | Measure-Object Length -s).sum / 1Gb)
 				if ($documentsDirectory -eq $documentsDirectory2)
 				{
@@ -674,7 +674,7 @@ function Show-ProfileBackup {
 				$downloadsDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Downloads | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`nThe Downloads Directory is $downloadsDirectory."
 				Robocopy $source\Downloads $dest\Downloads *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$downloadsDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Downloads| Measure-Object Length -s).sum / 1Gb)
 				if ($downloadsDirectory -eq $downloadsDirectory2)
 				{
@@ -814,21 +814,21 @@ function Show-ProfileBackup {
 				#IE Favorites
 				$richtextbox1.Text += "`nInitializing IE Favorites Backup. `nIE Favorites Directory is $favoritesDirectory large."
 				Robocopy $source\Favorites $dest\Favorites *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$ProgressBar1.Value = "60"
 				#Chrome Bookmarks
 				$chromeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Google\Chrome\User Data\Default" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
 				$richtextbox1.Text += "`nInitializing Chrome Bookmarks Backup. `nThe Chrome Bookmarks are $chromeDirectory large."
 				Robocopy "$source\AppData\Local\Google\Chrome\User Data\Default" "$destAppData\AppData\Local\Google\Chrome\User Data\Default" "Bookmarks.bak" "Custom Dictionary.txt" /S /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$ProgressBar1.Value = "63"
 				#Opera Favorites		
 				$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Roaming\Opera Software" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
 				$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $operaDirectory Large."
 				Robocopy "$source\AppData\Roaming\Opera Software" "$dest\AppData\Roaming\Opera Software" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$ProgressBar1.Value = "64"
 				#Edge Favorites
 				$edgeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default" | Measure-Object Length -s).sum / 1Gb)
@@ -841,14 +841,14 @@ function Show-ProfileBackup {
 				$richtextbox1.Text += "`n#############`n"
 				$richtextbox1.Text += "`nInitializing Vivaldi Favorites Backup. `nThe Opera Favorites Are $VivaldiDirectory Large."
 				Robocopy "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" "$dest\AppData\Local\Vivaldi\User Data\Default\Bookmarks" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$ProgressBar1.Value = "64"
 				#Firefox Bookmarks
 				$firefoxDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\AppData\Roaming\Mozilla\Firefox\Profiles | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
 				$richtextbox1.Text += "`nInitializing Firefox Bookmarks Backup. `nThe Firefox Bookmarks Are $firefoxDirectory Large."
 				Robocopy $source\AppData\Roaming\Mozilla\Firefox\Profiles $dest\AppData\Roaming\Mozilla\Firefox\Profiles *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`n`nIE, FireFox, Opera, Chrome and Vivaldi Bookmark Directories Completed Backing Up."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -875,7 +875,7 @@ function Show-ProfileBackup {
 					$speak.Speak("Backing up the Pictures Directory")
 				}
 				Robocopy $source\Pictures $dest\Pictures *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$picturesDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Pictures | Measure-Object Length -s).sum / 1Gb)
 				if ($picturesDirectory -eq $picturesDirectory2)
 				{
@@ -920,7 +920,7 @@ function Show-ProfileBackup {
 					$speak.Speak("Backing up the Video Directory")
 				}
 				Robocopy $source\Videos $dest\Videos *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 					#$videoDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Videos | Measure-Object Length -s).sum / 1Gb)
 					if ($videoDirectory -eq $videoDirectory2)
 					{
@@ -955,7 +955,7 @@ function Show-ProfileBackup {
 				#Office Quick Parts
 				$richtextbox1.Text += "`nInitializing Quick Parts Backup."
 				Robocopy "$source\application data\microsoft\templates" "$dest\application data\microsoft\templates" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nQuickParts Directory Completed Backing Up."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -978,7 +978,7 @@ function Show-ProfileBackup {
 				$richtextbox1.Text += "`nThe $source1 Directory is $customDirectory Large."
 				$richtextbox1.Text += "`nBacking up Directory $source1"
 				Robocopy $source1 $dest\Custom_Directory_Backup *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$customDirectory2 = "{0:N2} GB" -f ((Get-ChildItem $dest\Custom_Directory_Backup | Measure-Object Length -s).sum / 1Gb)
 				if ($customDirectory -eq $customDirectory2)
 				{
@@ -1013,7 +1013,7 @@ function Show-ProfileBackup {
 				#OneDrive Backup
 				$richtextbox1.Text += "`nInitializing OneDrive Directory Backup."
 				Robocopy $source\OneDrive - Embry-Riddle Aeronautical University $dest\OneDrive - Embry-Riddle Aeronautical University.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nOneDrive Directory Completed Backing Up."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -1031,7 +1031,7 @@ function Show-ProfileBackup {
 				#Adobe Signature 
 				$richtextbox1.Text += "`nInitializing Adobe Signature/Security Directory Backup."
 				Robocopy $source\AppData\Roaming\Adobe\Acrobat\DC\Security $dest\AppData\Roaming\Adobe\Acrobat\DC\Security *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nAdobe Signature/security Directory Completed Backing Up."
 				$richtextbox1.Text += "`n#############`n"
 				If ($checkboxMuteVoice.Checked)
@@ -1048,7 +1048,7 @@ function Show-ProfileBackup {
 				#Outlook Signature
 				$richtextbox1.Text += "`nInitializing Outlook Signature Directory Backup."
 				Robocopy $source\application data\microsoft\signatures $dest\application data\microsoft\signatures *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nOutlook Signature Completed Backing Up."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -1103,7 +1103,7 @@ function Show-ProfileBackup {
 				#$richtextbox1.Text += "`n#############`n"
 				#$ProgressBar1.Value = "97"
 				Robocopy $source\AppData\Local\Microsoft\Outlook $dest\AppData\Local\Microsoft\Outlook *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nOutlook settings backed up to $dest\AppData\Local\Microsoft\Outlook."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -1118,7 +1118,7 @@ function Show-ProfileBackup {
 			{
 				#The Ribbon and QAT settings in Outlook 2010, Outlook 2013 and Outlook 2016 are stored in officeUI-files in the following folder
 				Robocopy $source\AppData\Local\Microsoft\Office $dest\AppData\Local\Microsoft\Office *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nThe Ribbon and QAT settings in Outlook have been backed up."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -1135,7 +1135,7 @@ function Show-ProfileBackup {
 				#Sticky Notes
 				$richtextbox1.Text += "`nInitializing Sticky Notes Directory Backup."
 				Robocopy $source\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState $dest\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nStickey Notes Directory Backup Completed.."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -1152,9 +1152,9 @@ function Show-ProfileBackup {
 				#OneNote 2016
 				$richtextbox1.Text += "`nInitializing OneNote 2016 Directory Backup."
 				Robocopy $source\AppData\Local\Microsoft\OneNote\version\Backup $dest\AppData\Local\Microsoft\OneNote\version\Backup *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				Robocopy $source\AppData\Roaming\Microsoft\OneNote $dest\AppData\Roaming\Microsoft\OneNote *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				updateTextBox2
+				
 				$richtextbox1.Text += "`nOneNote 2016 Directory Backup Completed.."
 				If ($checkboxMuteVoice.Checked)
 				{
@@ -1170,7 +1170,7 @@ function Show-ProfileBackup {
 			#Onedrive not sync'd files
 			$richtextbox1.Text += "`nInitializing OneDrive-Not-Yet-Syncd-Files Directory Backup."
 			Robocopy $source\ODBA $dest\ODBA *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-			updateTextBox2
+			
 			$richtextbox1.Text += "`nOneDrive-Not-Yet-Syncd-Files Directory Completed Backing Up."
 			If ($checkboxMuteVoice.Checked)
 			{
