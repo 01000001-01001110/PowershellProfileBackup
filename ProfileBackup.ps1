@@ -14,15 +14,15 @@ function Show-ProfileBackup {
 	#----------------------------------------------
 	#region Import the Assemblies
 	#----------------------------------------------
-	[void][reflection.assembly]::Load('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
 	[void][reflection.assembly]::Load('System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
+	[void][reflection.assembly]::Load('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
 	#endregion Import Assemblies
 
 	#----------------------------------------------
 	#region Generated Form Objects
 	#----------------------------------------------
 	[System.Windows.Forms.Application]::EnableVisualStyles()
-	$formProfileBackup017ByAl = New-Object 'System.Windows.Forms.Form'
+	$formProfileBackup019ByAl = New-Object 'System.Windows.Forms.Form'
 	$checkboxMuteVoice = New-Object 'System.Windows.Forms.CheckBox'
 	$tabcontrol1 = New-Object 'System.Windows.Forms.TabControl'
 	$tabpage1 = New-Object 'System.Windows.Forms.TabPage'
@@ -116,7 +116,7 @@ function Show-ProfileBackup {
 	# User Generated Script
 	#----------------------------------------------
 	
-	$formProfileBackup017ByAl_Load={
+	$formProfileBackup019ByAl_Load={
 		#TODO: Initialize Form Controls here
 		
 	}
@@ -406,10 +406,10 @@ function Show-ProfileBackup {
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		#Write-Host = "Processes - Not Gathered Due to Secuity Policies."
+		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering Current Processes.`n"
 		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		#Write-Host = "Service - Not Gathered Due to Secuity Policies."
+		Write-Host = "Service - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering System Services.`n"
 		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
@@ -710,44 +710,84 @@ function Show-ProfileBackup {
 				$richtextbox1.Text += "`nInitializing Browser data backup. We are attempting closing the browsers now."
 				If ($checkboxMuteVoice.Checked)
 				{
-					#$speak.Speak("Backing up the browser data. We are closing the browsers now.")
+					#$speak.Speak("Backing up the browser data. Please help me by closing the browsers. We are first checking to see what browsers are installed. Then closing those. Then backing up.")
 				}
 				else
 				{
 					$speak.Speak("Backing up the browser data. We are closing the browsers now.")
 				}
 				
-				#Find and close Firefox browser
-				$firefox = Get-Process firefox -ErrorAction SilentlyContinue
-				if ($firefox)
+				$richtextbox1.Text += "`n`nSometimes I do not close all the windows, please verify that all browser windows are closed now."
+				$richtextbox1.Text += "`n`nFailure to close the browser windows will halt the backup until they are closed."
+				$richtextbox1.Text += "`nYou have been warned..."
+				$richtextbox1.Text += "####################################################"
+				#IE Favorites
+				$favoritesDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Favorites | Measure-Object Length -s).sum / 1Gb)
+				$richtextbox1.Text += "`nInitializing IE Favorites Backup. `nIE Favorites Directory is $favoritesDirectory large."
+				Robocopy $source\Favorites $dest\Favorites *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				
+				$ProgressBar1.Value = "60"
+				$software = "Firefox";
+				$installed = (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -Match $software }) -ne $null
+				
+				If (-Not $installed)
 				{
-					$richtextbox1.Text += "Firefox was found running, closing the application gracefully."
-					# try gracefully first
-					$firefox.CloseMainWindow()
-					# kill after five seconds
-					Sleep 5
-					if (!$firefox.HasExited)
+					Write-Host "'$software' NOT is installed. Continuing with backup.";
+				}
+				else
+				{
+					#Find and close Firefox browser
+					$firefox = Get-Process firefox -ErrorAction SilentlyContinue
+					if ($firefox)
 					{
-						$richtextbox1.Text += "Firefox did not shut down gracefully, forcing the application closed now."
-						$firefox | Stop-Process -Force
+						$richtextbox1.Text += "Firefox was found running, closing the application gracefully."
+						# try gracefully first
+						$firefox.CloseMainWindow()
+						# kill after five seconds
+						Sleep 5
+						if (!$firefox.HasExited)
+						{
+							$richtextbox1.Text += "Firefox did not shut down gracefully, forcing the application closed now."
+							$firefox | Stop-Process -Force
+						}
 					}
+					#Firefox Bookmarks
+					$firefoxDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\AppData\Roaming\Mozilla\Firefox\Profiles | Measure-Object Length -s).sum / 1Gb)
+					$richtextbox1.Text += "`n#############`n"
+					$richtextbox1.Text += "`nInitializing Firefox Bookmarks Backup. `nThe Firefox Bookmarks Are $firefoxDirectory Large."
+					Robocopy $source\AppData\Roaming\Mozilla\Firefox\Profiles $dest\AppData\Roaming\Mozilla\Firefox\Profiles *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				}
 				
+				#Check for installation of browser before attempting to back it up.
+				$software = "Chrome";
+				$installed = (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -Match $software }) -ne $null
 				
-				#Find and close Chrome browser
-				$chrome = Get-Process chrome -ErrorAction SilentlyContinue
-				if ($chrome)
+				If (-Not $installed)
 				{
-					$richtextbox1.Text += "Chrome was found running, closing the application gracefully."
-					# try gracefully first
-					$chrome.CloseMainWindow()
-					# kill after five seconds
-					Sleep 5
-					if (!$chrome.HasExited)
+					Write-Host "'$software' NOT is installed. Continuing with backup.";
+				}
+				else
+				{
+					#Find and close Chrome browser
+					$chrome = Get-Process chrome -ErrorAction SilentlyContinue
+					if ($chrome)
 					{
-						$richtextbox1.Text += "Chrome was found running, closing."
-						$chrome | Stop-Process -Force
+						$richtextbox1.Text += "Chrome was found running, closing the application gracefully."
+						# try gracefully first
+						$chrome.CloseMainWindow()
+						# kill after five seconds
+						Sleep 5
+						if (!$chrome.HasExited)
+						{
+							$richtextbox1.Text += "Chrome was found running, closing."
+							$chrome | Stop-Process -Force
+						}
 					}
+					$chromeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Google\Chrome\User Data\Default" | Measure-Object Length -s).sum / 1Gb)
+					$richtextbox1.Text += "`n#############`n"
+					$richtextbox1.Text += "`nInitializing Chrome Bookmarks Backup. `nThe Chrome Bookmarks are $chromeDirectory large."
+					Robocopy "$source\AppData\Local\Google\Chrome\User Data\Default" "$destAppData\AppData\Local\Google\Chrome\User Data\Default" "Bookmarks.bak" "Custom Dictionary.txt" /S /LOG+:$source\desktop\backuplog.txt
+					$ProgressBar1.Value = "63"
 				}
 				
 				
@@ -767,87 +807,77 @@ function Show-ProfileBackup {
 					}
 				}
 				
+				$software = "Opera";
+				$installed = (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -Match $software }) -ne $null
 				
-				#Find and close Opera Explorer
-				$opera = Get-Process Opera -ErrorAction SilentlyContinue
-				if ($opera)
+				If (-Not $installed)
 				{
-					$richtextbox1.Text += "Opera was found running, closing the application gracefully."
-					# try gracefully first
-					$opera.CloseMainWindow()
-					# kill after five seconds
-					Sleep 5
-					if (!$opera.HasExited)
+					Write-Host "'$software' NOT is installed. Continuing with backup.";
+				}
+				else
+				{
+					#Find and close Opera Explorer
+					$opera = Get-Process Opera -ErrorAction SilentlyContinue
+					if ($opera)
 					{
-						$richtextbox1.Text += "Opera was found running, closing."
-						$opera | Stop-Process -Force
+						$richtextbox1.Text += "Opera was found running, closing the application gracefully."
+						# try gracefully first
+						$opera.CloseMainWindow()
+						# kill after five seconds
+						Sleep 5
+						if (!$opera.HasExited)
+						{
+							$richtextbox1.Text += "Opera was found running, closing."
+							$opera | Stop-Process -Force
+						}
 					}
+					#Opera Favorites		
+					$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Roaming\Opera Software" | Measure-Object Length -s).sum / 1Gb)
+					$richtextbox1.Text += "`n#############`n"
+					$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $operaDirectory Large."
+					Robocopy "$source\AppData\Roaming\Opera Software" "$dest\AppData\Roaming\Opera Software" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				}
 				
 				
-				#Find and close Vivaldi Explorer
-				$vivaldi = Get-Process Vivaldi -ErrorAction SilentlyContinue
-				if ($vivaldi)
+				$software = "Vivaldi";
+				$installed = (Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where { $_.DisplayName -Match $software }) -ne $null
+				
+				If (-Not $installed)
 				{
-					$richtextbox1.Text += "Opera was found running, closing the application gracefully."
-					# try gracefully first
-					$vivaldi.CloseMainWindow()
-					# kill after five seconds
-					Sleep 5
-					if (!$vivaldi.HasExited)
-					{
-						$richtextbox1.Text += "Opera was found running, closing."
-						$vivaldi | Stop-Process -Force
-					}
+					Write-Host "'$software' NOT is installed. Continuing with backup.";
 				}
-				Remove-Variable vivaldi
-				Remove-Variable opera
-				Remove-Variable ie
-				Remove-Variable chrome
-				Remove-Variable firefox
+				else
+				{
+					#Find and close Vivaldi Explorer
+					$vivaldi = Get-Process Vivaldi -ErrorAction SilentlyContinue
+					if ($vivaldi)
+					{
+						$richtextbox1.Text += "Opera was found running, closing the application gracefully."
+						# try gracefully first
+						$vivaldi.CloseMainWindow()
+						# kill after five seconds
+						Sleep 5
+						if (!$vivaldi.HasExited)
+						{
+							$richtextbox1.Text += "Opera was found running, closing."
+							$vivaldi | Stop-Process -Force
+						}
+					}
+					#Vivaldi Favorites		
+					$VivaldiDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" | Measure-Object Length -s).sum / 1Gb)
+					$richtextbox1.Text += "`n#############`n"
+					$richtextbox1.Text += "`nInitializing Vivaldi Favorites Backup. `nThe Opera Favorites Are $VivaldiDirectory Large."
+					Robocopy "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" "$dest\AppData\Local\Vivaldi\User Data\Default\Bookmarks" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+					$ProgressBar1.Value = "64"
+				}
 				
-				$favoritesDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\Favorites | Measure-Object Length -s).sum / 1Gb)
-				$richtextbox1.Text += "`n`nSometimes I do not close all the windows, please verify that all browser windows are closed now."
-				$richtextbox1.Text += "`n`nFailure to close the browser windows will halt the backup until they are closed."
-				$richtextbox1.Text += "`nYou have been warned..."
-				$richtextbox1.Text += "####################################################"
-				#IE Favorites
-				$richtextbox1.Text += "`nInitializing IE Favorites Backup. `nIE Favorites Directory is $favoritesDirectory large."
-				Robocopy $source\Favorites $dest\Favorites *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				
-				$ProgressBar1.Value = "60"
-				#Chrome Bookmarks
-				$chromeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Google\Chrome\User Data\Default" | Measure-Object Length -s).sum / 1Gb)
-				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Chrome Bookmarks Backup. `nThe Chrome Bookmarks are $chromeDirectory large."
-				Robocopy "$source\AppData\Local\Google\Chrome\User Data\Default" "$destAppData\AppData\Local\Google\Chrome\User Data\Default" "Bookmarks.bak" "Custom Dictionary.txt" /S /LOG+:$source\desktop\backuplog.txt
-				
-				$ProgressBar1.Value = "63"
-				#Opera Favorites		
-				$operaDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Roaming\Opera Software" | Measure-Object Length -s).sum / 1Gb)
-				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $operaDirectory Large."
-				Robocopy "$source\AppData\Roaming\Opera Software" "$dest\AppData\Roaming\Opera Software" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
-				
-				$ProgressBar1.Value = "64"
 				#Edge Favorites
 				$edgeDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default" | Measure-Object Length -s).sum / 1Gb)
 				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Opera Favorites Backup. `nThe Opera Favorites Are $edgeDirectory Large."
+				$richtextbox1.Text += "`nInitializing Microsoft Edge Directory Backup. `nThe Microsoft Edge Directory Is $edgeDirectory Large."
 				Robocopy "$source\AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default" "$dest\AppData\Local\Packages\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\AC\MicrosoftEdge\User\Default" /e /XJ
 				$ProgressBar1.Value = "64"
-				#Vivaldi Favorites		
-				$VivaldiDirectory = "{0:N2} GB" -f ((Get-ChildItem "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" | Measure-Object Length -s).sum / 1Gb)
-				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Vivaldi Favorites Backup. `nThe Opera Favorites Are $VivaldiDirectory Large."
-				Robocopy "$source\AppData\Local\Vivaldi\User Data\Default\Bookmarks" "$dest\AppData\Local\Vivaldi\User Data\Default\Bookmarks" *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				
-				$ProgressBar1.Value = "64"
-				#Firefox Bookmarks
-				$firefoxDirectory = "{0:N2} GB" -f ((Get-ChildItem $source\AppData\Roaming\Mozilla\Firefox\Profiles | Measure-Object Length -s).sum / 1Gb)
-				$richtextbox1.Text += "`n#############`n"
-				$richtextbox1.Text += "`nInitializing Firefox Bookmarks Backup. `nThe Firefox Bookmarks Are $firefoxDirectory Large."
-				Robocopy $source\AppData\Roaming\Mozilla\Firefox\Profiles $dest\AppData\Roaming\Mozilla\Firefox\Profiles *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 				
 				$richtextbox1.Text += "`n`nIE, FireFox, Opera, Chrome and Vivaldi Bookmark Directories Completed Backing Up."
 				If ($checkboxMuteVoice.Checked)
@@ -856,7 +886,7 @@ function Show-ProfileBackup {
 				}
 				else
 				{
-					$speak.Speak("The Eye E, Fire Fox, Opera, and Chrome Bookmarks Directories Completed Backing Up. Continuing backup.")
+					$speak.Speak("The Eye E, Fire Fox, Opera, Vivaldi and Chrome Bookmark Directories Completed Backing Up. Continuing backup.")
 				}
 				$richtextbox1.Text += "`n####################################################"
 				$ProgressBar1.Value = "65"
@@ -1200,16 +1230,16 @@ function Show-ProfileBackup {
 				$speak.Rate = 4
 				$speak.Speak("Oh, I almost forgot")
 				$speak.Rate = 2
-				$speak.Speak("You need the installed printer information still. While I am at it I will backup your font directory, and the custom dictionary as well. Let me gather that for you now.")
+				$speak.Speak("You need the installed printer information still. While I am at it I will backup your font directory as well. Let me gather that for you now.")
 			}
 			$source = $Texbox1.Text
 			$dest = $Textbox2.Text
 			control printers
 			Get-Printers
-			#Custom Dictionary
-			Robocopy $source\AppData\Roaming\Microsoft\UProof $dest\AppData\Roaming\Microsoft\UProof *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 			#Fonts
 			Robocopy C:\Windows\Fonts $dest\Fonts *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+			#Custom Dictionary
+			Robocopy $source\AppData\Roaming\Microsoft\UProof $dest\AppData\Roaming\Microsoft\UProof *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
 			$statusbar1.Visible = $true
 			Start-Sleep -Seconds 3
 			$statusbar1.Visible = $false
@@ -1476,6 +1506,7 @@ function Show-ProfileBackup {
 		$richtextbox3.Text += Get-CimInstance -Class Win32_Fan  -Property * | Select-Object -Property * | Out-String
 	}
 	
+	
 	# --End User Generated Script--
 	#----------------------------------------------
 	#region Generated Events
@@ -1484,7 +1515,7 @@ function Show-ProfileBackup {
 	$Form_StateCorrection_Load=
 	{
 		#Correct the initial state of the form to prevent the .Net maximized form issue
-		$formProfileBackup017ByAl.WindowState = $InitialFormWindowState
+		$formProfileBackup019ByAl.WindowState = $InitialFormWindowState
 	}
 	
 	$Form_Cleanup_FormClosed=
@@ -1534,9 +1565,9 @@ function Show-ProfileBackup {
 			$buttonBrowseSource.remove_Click($buttonBrowseSource_Click)
 			$buttonBACKUP.remove_Click($buttonBACKUP_Click)
 			$buttonDisplayPrinters.remove_Click($buttonDisplayPrinters_Click)
-			$formProfileBackup017ByAl.remove_Load($formProfileBackup017ByAl_Load)
-			$formProfileBackup017ByAl.remove_Load($Form_StateCorrection_Load)
-			$formProfileBackup017ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
+			$formProfileBackup019ByAl.remove_Load($formProfileBackup019ByAl_Load)
+			$formProfileBackup019ByAl.remove_Load($Form_StateCorrection_Load)
+			$formProfileBackup019ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
 		}
 		catch { Out-Null <# Prevent PSScriptAnalyzer warning #> }
 	}
@@ -1545,33 +1576,33 @@ function Show-ProfileBackup {
 	#----------------------------------------------
 	#region Generated Form Code
 	#----------------------------------------------
-	$formProfileBackup017ByAl.SuspendLayout()
-	$groupbox3.SuspendLayout()
-	$groupbox2.SuspendLayout()
+	$formProfileBackup019ByAl.SuspendLayout()
 	$tabcontrol1.SuspendLayout()
 	$tabpage1.SuspendLayout()
 	$tabpage3.SuspendLayout()
 	$tabpage4.SuspendLayout()
+	$groupbox3.SuspendLayout()
+	$groupbox2.SuspendLayout()
 	#
-	# formProfileBackup017ByAl
+	# formProfileBackup019ByAl
 	#
-	$formProfileBackup017ByAl.Controls.Add($checkboxMuteVoice)
-	$formProfileBackup017ByAl.Controls.Add($tabcontrol1)
-	$formProfileBackup017ByAl.Controls.Add($buttonInventoryComputer)
-	$formProfileBackup017ByAl.Controls.Add($checkboxSelectAll)
-	$formProfileBackup017ByAl.Controls.Add($statusbar1)
-	$formProfileBackup017ByAl.Controls.Add($labelCheckDirectoryYouWan)
-	$formProfileBackup017ByAl.Controls.Add($progressbar1)
-	$formProfileBackup017ByAl.Controls.Add($groupbox3)
-	$formProfileBackup017ByAl.Controls.Add($groupbox2)
-	$formProfileBackup017ByAl.Controls.Add($buttonBACKUP)
-	$formProfileBackup017ByAl.Controls.Add($buttonDisplayPrinters)
-	$formProfileBackup017ByAl.AutoScaleDimensions = '6, 13'
-	$formProfileBackup017ByAl.AutoScaleMode = 'Font'
-	$formProfileBackup017ByAl.BackgroundImageLayout = 'Center'
-	$formProfileBackup017ByAl.ClientSize = '711, 557'
+	$formProfileBackup019ByAl.Controls.Add($checkboxMuteVoice)
+	$formProfileBackup019ByAl.Controls.Add($tabcontrol1)
+	$formProfileBackup019ByAl.Controls.Add($buttonInventoryComputer)
+	$formProfileBackup019ByAl.Controls.Add($checkboxSelectAll)
+	$formProfileBackup019ByAl.Controls.Add($statusbar1)
+	$formProfileBackup019ByAl.Controls.Add($labelCheckDirectoryYouWan)
+	$formProfileBackup019ByAl.Controls.Add($progressbar1)
+	$formProfileBackup019ByAl.Controls.Add($groupbox3)
+	$formProfileBackup019ByAl.Controls.Add($groupbox2)
+	$formProfileBackup019ByAl.Controls.Add($buttonBACKUP)
+	$formProfileBackup019ByAl.Controls.Add($buttonDisplayPrinters)
+	$formProfileBackup019ByAl.AutoScaleDimensions = '6, 13'
+	$formProfileBackup019ByAl.AutoScaleMode = 'Font'
+	$formProfileBackup019ByAl.BackgroundImageLayout = 'Center'
+	$formProfileBackup019ByAl.ClientSize = '711, 557'
 	#region Binary Data
-	$formProfileBackup017ByAl.Icon = [System.Convert]::FromBase64String('
+	$formProfileBackup019ByAl.Icon = [System.Convert]::FromBase64String('
 AAABAAEA4eEAAAEAIABMMwMAFgAAACgAAADhAAAAwgEAAAEAIAAAAAAABBcDAAAAAAAAAAAAAAAA
 AAAAAAAAAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/
 AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AQEB/wICAv8A
@@ -5254,9 +5285,9 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAA=')
 	#endregion
-	$formProfileBackup017ByAl.Name = 'formProfileBackup017ByAl'
-	$formProfileBackup017ByAl.Text = 'Profile Backup 0.1.7 - By: Alan Newingham'
-	$formProfileBackup017ByAl.add_Load($formProfileBackup017ByAl_Load)
+	$formProfileBackup019ByAl.Name = 'formProfileBackup019ByAl'
+	$formProfileBackup019ByAl.Text = 'Profile Backup 0.1.9 - By: Alan Newingham'
+	$formProfileBackup019ByAl.add_Load($formProfileBackup019ByAl_Load)
 	#
 	# checkboxMuteVoice
 	#
@@ -6230,27 +6261,28 @@ AAA=')
 	#
 	# tooltip1
 	#
+	$groupbox2.ResumeLayout()
+	$groupbox3.ResumeLayout()
 	$tabpage4.ResumeLayout()
 	$tabpage3.ResumeLayout()
 	$tabpage1.ResumeLayout()
 	$tabcontrol1.ResumeLayout()
-	$groupbox2.ResumeLayout()
-	$groupbox3.ResumeLayout()
-	$formProfileBackup017ByAl.ResumeLayout()
+	$formProfileBackup019ByAl.ResumeLayout()
 	#endregion Generated Form Code
 
 	#----------------------------------------------
 
 	#Save the initial state of the form
-	$InitialFormWindowState = $formProfileBackup017ByAl.WindowState
+	$InitialFormWindowState = $formProfileBackup019ByAl.WindowState
 	#Init the OnLoad event to correct the initial state of the form
-	$formProfileBackup017ByAl.add_Load($Form_StateCorrection_Load)
+	$formProfileBackup019ByAl.add_Load($Form_StateCorrection_Load)
 	#Clean up the control events
-	$formProfileBackup017ByAl.add_FormClosed($Form_Cleanup_FormClosed)
+	$formProfileBackup019ByAl.add_FormClosed($Form_Cleanup_FormClosed)
 	#Show the Form
-	return $formProfileBackup017ByAl.ShowDialog()
+	return $formProfileBackup019ByAl.ShowDialog()
 
 } #End Function
 
 #Call the form
 Show-ProfileBackup | Out-Null
+
