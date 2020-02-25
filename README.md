@@ -19,6 +19,7 @@ The script starts and ends by logging the start and end time in the LOG window. 
 -Documents
 -Pictures
 -Videos
+-Fonts Directory
 -Browsers (IE, FF, Chrome, Vivaldi, Opera, and Edge)
 -OneNote 2016 if in one of two spots.
 -Office Ribbon Data
