@@ -2,7 +2,7 @@
 <br>
 If you'd like to show your appreciation you can buy me a tea <a href="buymeacoff.ee/mwWXAyznc">here</a><br><br>
 
-![image](https://user-images.githubusercontent.com/48245017/69575192-bfc41b00-0f97-11ea-9169-751165e026b1.png)
+![image](https://user-images.githubusercontent.com/48245017/75276609-78d30500-57d4-11ea-88f1-053f11ca2a5d.png)
 
 <pre>Profile Backup Script:
 You can choose to type in the full UNC path to your from location and your to location. OR You can choose to click the button and browse to the directories you'd like to choose.
@@ -36,6 +36,25 @@ The script starts and ends by logging the start and end time in the LOG window. 
 -NetHood Directory
 -PrintHood Directory
 -Start Menu Programs
+-Cache Directory
+-CD Burning Directory
+-Cookies Directory
+-Cookies\Low Directory
+-Credential  Manager Directory
+-Crypt Keys Directory
+-Device Metadata Store Directory
+-dpapiKeys Directory
+-NetHood Directory
+-PrintHood Directory
+-Start Menu Programs
+-Quick Launch Directory
+-Recent Directory
+-Saved Games Directory
+-Search History Directory
+-Start Menu Directory
+-Startup Directory
+-System Certificates
+-Templates
 -Quick Launch Directory
 -Recent Directory
 -Saved Games Directory
@@ -47,6 +66,7 @@ The script starts and ends by logging the start and end time in the LOG window. 
 -Fonts
 -Adobe Signature/Security 
 -Win10 Sticky Notes
+-Group Policy Settings
 -One Drive, if you must spend time backing up a cloud backup....
 -OneDrive-Not-Yet-Syncd-Files (Yeah... find this directory in a search online. This was not an easy find for me.)
 -Lastly one Custom Directory of your choosing as long as you have the correct UNC path to the location. 
