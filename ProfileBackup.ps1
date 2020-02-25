@@ -22,7 +22,7 @@ function Show-ProfileBackup {
 	#region Generated Form Objects
 	#----------------------------------------------
 	[System.Windows.Forms.Application]::EnableVisualStyles()
-	$formProfileBackup019ByAl = New-Object 'System.Windows.Forms.Form'
+	$formProfileBackup020ByAl = New-Object 'System.Windows.Forms.Form'
 	$checkboxMuteVoice = New-Object 'System.Windows.Forms.CheckBox'
 	$tabcontrol1 = New-Object 'System.Windows.Forms.TabControl'
 	$tabpage1 = New-Object 'System.Windows.Forms.TabPage'
@@ -84,6 +84,7 @@ function Show-ProfileBackup {
 	$labelCheckDirectoryYouWan = New-Object 'System.Windows.Forms.Label'
 	$progressbar1 = New-Object 'System.Windows.Forms.ProgressBar'
 	$groupbox3 = New-Object 'System.Windows.Forms.GroupBox'
+	$checkboxGroupPolicy = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxComprehensiveBackup = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxOneNote2016 = New-Object 'System.Windows.Forms.CheckBox'
 	$checkboxStickyNotes = New-Object 'System.Windows.Forms.CheckBox'
@@ -116,7 +117,7 @@ function Show-ProfileBackup {
 	# User Generated Script
 	#----------------------------------------------
 	
-	$formProfileBackup019ByAl_Load={
+	$formProfileBackup020ByAl_Load={
 		#TODO: Initialize Form Controls here
 		
 	}
@@ -406,10 +407,10 @@ function Show-ProfileBackup {
 		Write-Host = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		Write-Host = "Processes - Not Gathered Due to Secuity Policies."
+		#Write-Host = "Processes - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering Current Processes.`n"
 		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		Write-Host = "Service - Not Gathered Due to Secuity Policies."
+		#Write-Host = "Service - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering System Services.`n"
 		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
@@ -1197,6 +1198,53 @@ function Show-ProfileBackup {
 				$richtextbox1.Text += "`n#############`n"
 			}
 			
+			If ($checkboxGroupPolicy.Checked)
+			{
+				#Group Policy
+				#Check if directory is already there, if not make it.
+				
+				$GPOpath = "$dest\GroupPolicyBackup"
+				If (!(test-path $GPOpath))
+				{
+					New-Item -ItemType Directory -Force -Path $GPOpath
+				}
+				
+				$richtextbox1.Text += "`nInitializing Group Policy Backup."
+				$richtextbox1.Text += "`n#############`n`n"
+				$richtextbox1.Text += "`First Command we run is secedit /export /cfg $GPOpath\security.csv"
+				$richtextbox1.Text += "`This will create a csv with all of your security information in it (password requirements and age restrictions) Copy this to the same shared location that the Group Policy objects are in."
+				
+				secedit /export /cfg $GPOpath\security.csv
+				
+				$richtextbox1.Text += "`n#############`n`n"
+				$richtextbox1.Text += "`Second Command we run is Auditpol /backup /file:$GPOpath\audit.ini"
+				$richtextbox1.Text += "`nThis will create an ini with your Audit policy information in it. (Registry file access success and failures) Copy this to the same shared location that the other files are in."
+				
+				Auditpol /backup /file:$GPOpath\audit.ini
+				
+				$richtextbox1.Text += "`n#############`n`n"
+				$richtextbox1.Text += "`Last Command we run is Robocopy C:\Windows\System32\GroupPolicy..."
+				$richtextbox1.Text += "`nThis backs up the entire directories needed.`n"
+				
+				Robocopy C:\Windows\System32\GroupPolicy $GPOpath\WinGPODIR *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
+				
+				$richtextbox1.Text += "`nGroup Policy Backup Completed.. `n"
+				$richtextbox1.Text += "`nLastly should you want to import these settings into a new computer.`n"
+				$richtextbox1.Text += "`n1. Copy the GP directory located now in $dest\WinGPODIR to C:\Windows\System32\GroupPolicy"
+				$richtextbox1.Text += "`n2. With an elevated command or PowerShell prompt type: Secedit /configure /cfg $dest\GroupPolicyBackup\Security.csv /db defltbase.sdb /verbose"
+				$richtextbox1.Text += "`n3. With an elevated command or PowerShell prompt type: Auditpol /restore /file:$dest\GroupPolicyBackup\audit.ini"
+				If ($checkboxMuteVoice.Checked)
+				{
+					#$speak.Speak("Group Policy Backup Completed Backing Up.")
+				}
+				else
+				{
+					$speak.Speak("Group Policy Backup Completed Backing Up.")
+				}
+				$richtextbox1.Text += "`n#############`n"
+			}
+			
+			
 			#Onedrive not sync'd files
 			$richtextbox1.Text += "`nInitializing OneDrive-Not-Yet-Syncd-Files Directory Backup."
 			Robocopy $source\ODBA $dest\ODBA *.* /E /ZB /J /LOG+:$source\desktop\backuplog.txt
@@ -1364,6 +1412,7 @@ function Show-ProfileBackup {
 			$checkboxDocuments.Checked = $true
 			$checkboxDesktop.Checked = $true
 			$checkboxComprehensiveBackup.Checked = $true
+			$checkboxGroupPolicy.Checked = $true
 	}
 	
 	$buttonControlPanel_Click={
@@ -1507,6 +1556,11 @@ function Show-ProfileBackup {
 	}
 	
 	
+	$checkboxGroupPolicy_CheckedChanged={
+		#TODO: Place custom script here
+		
+	}
+	
 	# --End User Generated Script--
 	#----------------------------------------------
 	#region Generated Events
@@ -1515,7 +1569,7 @@ function Show-ProfileBackup {
 	$Form_StateCorrection_Load=
 	{
 		#Correct the initial state of the form to prevent the .Net maximized form issue
-		$formProfileBackup019ByAl.WindowState = $InitialFormWindowState
+		$formProfileBackup020ByAl.WindowState = $InitialFormWindowState
 	}
 	
 	$Form_Cleanup_FormClosed=
@@ -1561,13 +1615,14 @@ function Show-ProfileBackup {
 			$buttonFAn.remove_Click($buttonFAn_Click)
 			$buttonInventoryComputer.remove_Click($buttonInventoryComputer_Click)
 			$checkboxSelectAll.remove_CheckedChanged($checkboxSelectAll_CheckedChanged)
+			$checkboxGroupPolicy.remove_CheckedChanged($checkboxGroupPolicy_CheckedChanged)
 			$buttonBrowseDestination.remove_Click($buttonBrowseDestination_Click)
 			$buttonBrowseSource.remove_Click($buttonBrowseSource_Click)
 			$buttonBACKUP.remove_Click($buttonBACKUP_Click)
 			$buttonDisplayPrinters.remove_Click($buttonDisplayPrinters_Click)
-			$formProfileBackup019ByAl.remove_Load($formProfileBackup019ByAl_Load)
-			$formProfileBackup019ByAl.remove_Load($Form_StateCorrection_Load)
-			$formProfileBackup019ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
+			$formProfileBackup020ByAl.remove_Load($formProfileBackup020ByAl_Load)
+			$formProfileBackup020ByAl.remove_Load($Form_StateCorrection_Load)
+			$formProfileBackup020ByAl.remove_FormClosed($Form_Cleanup_FormClosed)
 		}
 		catch { Out-Null <# Prevent PSScriptAnalyzer warning #> }
 	}
@@ -1576,7 +1631,7 @@ function Show-ProfileBackup {
 	#----------------------------------------------
 	#region Generated Form Code
 	#----------------------------------------------
-	$formProfileBackup019ByAl.SuspendLayout()
+	$formProfileBackup020ByAl.SuspendLayout()
 	$tabcontrol1.SuspendLayout()
 	$tabpage1.SuspendLayout()
 	$tabpage3.SuspendLayout()
@@ -1584,25 +1639,25 @@ function Show-ProfileBackup {
 	$groupbox3.SuspendLayout()
 	$groupbox2.SuspendLayout()
 	#
-	# formProfileBackup019ByAl
+	# formProfileBackup020ByAl
 	#
-	$formProfileBackup019ByAl.Controls.Add($checkboxMuteVoice)
-	$formProfileBackup019ByAl.Controls.Add($tabcontrol1)
-	$formProfileBackup019ByAl.Controls.Add($buttonInventoryComputer)
-	$formProfileBackup019ByAl.Controls.Add($checkboxSelectAll)
-	$formProfileBackup019ByAl.Controls.Add($statusbar1)
-	$formProfileBackup019ByAl.Controls.Add($labelCheckDirectoryYouWan)
-	$formProfileBackup019ByAl.Controls.Add($progressbar1)
-	$formProfileBackup019ByAl.Controls.Add($groupbox3)
-	$formProfileBackup019ByAl.Controls.Add($groupbox2)
-	$formProfileBackup019ByAl.Controls.Add($buttonBACKUP)
-	$formProfileBackup019ByAl.Controls.Add($buttonDisplayPrinters)
-	$formProfileBackup019ByAl.AutoScaleDimensions = '6, 13'
-	$formProfileBackup019ByAl.AutoScaleMode = 'Font'
-	$formProfileBackup019ByAl.BackgroundImageLayout = 'Center'
-	$formProfileBackup019ByAl.ClientSize = '711, 557'
+	$formProfileBackup020ByAl.Controls.Add($checkboxMuteVoice)
+	$formProfileBackup020ByAl.Controls.Add($tabcontrol1)
+	$formProfileBackup020ByAl.Controls.Add($buttonInventoryComputer)
+	$formProfileBackup020ByAl.Controls.Add($checkboxSelectAll)
+	$formProfileBackup020ByAl.Controls.Add($statusbar1)
+	$formProfileBackup020ByAl.Controls.Add($labelCheckDirectoryYouWan)
+	$formProfileBackup020ByAl.Controls.Add($progressbar1)
+	$formProfileBackup020ByAl.Controls.Add($groupbox3)
+	$formProfileBackup020ByAl.Controls.Add($groupbox2)
+	$formProfileBackup020ByAl.Controls.Add($buttonBACKUP)
+	$formProfileBackup020ByAl.Controls.Add($buttonDisplayPrinters)
+	$formProfileBackup020ByAl.AutoScaleDimensions = '6, 13'
+	$formProfileBackup020ByAl.AutoScaleMode = 'Font'
+	$formProfileBackup020ByAl.BackgroundImageLayout = 'Center'
+	$formProfileBackup020ByAl.ClientSize = '711, 557'
 	#region Binary Data
-	$formProfileBackup019ByAl.Icon = [System.Convert]::FromBase64String('
+	$formProfileBackup020ByAl.Icon = [System.Convert]::FromBase64String('
 AAABAAEA4eEAAAEAIABMMwMAFgAAACgAAADhAAAAwgEAAAEAIAAAAAAABBcDAAAAAAAAAAAAAAAA
 AAAAAAAAAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/
 AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AQEB/wICAv8A
@@ -5285,9 +5340,9 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAA=')
 	#endregion
-	$formProfileBackup019ByAl.Name = 'formProfileBackup019ByAl'
-	$formProfileBackup019ByAl.Text = 'Profile Backup 0.1.9 - By: Alan Newingham'
-	$formProfileBackup019ByAl.add_Load($formProfileBackup019ByAl_Load)
+	$formProfileBackup020ByAl.Name = 'formProfileBackup020ByAl'
+	$formProfileBackup020ByAl.Text = 'Profile Backup 0.2.0 - By: Alan Newingham 2/25/2020'
+	$formProfileBackup020ByAl.add_Load($formProfileBackup020ByAl_Load)
 	#
 	# checkboxMuteVoice
 	#
@@ -5938,7 +5993,7 @@ AAA=')
 	#
 	$buttonInventoryComputer.BackColor = 'MenuHighlight'
 	$buttonInventoryComputer.Font = 'Arial, 9pt, style=Bold'
-	$buttonInventoryComputer.Location = '12, 467'
+	$buttonInventoryComputer.Location = '12, 483'
 	$buttonInventoryComputer.Name = 'buttonInventoryComputer'
 	$buttonInventoryComputer.Size = '129, 45'
 	$buttonInventoryComputer.TabIndex = 33
@@ -5961,9 +6016,9 @@ AAA=')
 	#
 	# statusbar1
 	#
-	$statusbar1.Location = '0, 535'
+	$statusbar1.Location = '0, 541'
 	$statusbar1.Name = 'statusbar1'
-	$statusbar1.Size = '711, 22'
+	$statusbar1.Size = '711, 16'
 	$statusbar1.TabIndex = 50
 	#
 	# labelCheckDirectoryYouWan
@@ -5977,13 +6032,14 @@ AAA=')
 	#
 	# progressbar1
 	#
-	$progressbar1.Location = '0, 524'
+	$progressbar1.Location = '0, 534'
 	$progressbar1.Name = 'progressbar1'
 	$progressbar1.Size = '711, 11'
 	$progressbar1.TabIndex = 30
 	#
 	# groupbox3
 	#
+	$groupbox3.Controls.Add($checkboxGroupPolicy)
 	$groupbox3.Controls.Add($checkboxComprehensiveBackup)
 	$groupbox3.Controls.Add($checkboxOneNote2016)
 	$groupbox3.Controls.Add($checkboxStickyNotes)
@@ -6003,11 +6059,22 @@ AAA=')
 	$groupbox3.Controls.Add($checkboxDesktop)
 	$groupbox3.Location = '14, 121'
 	$groupbox3.Name = 'groupbox3'
-	$groupbox3.Size = '251, 335'
+	$groupbox3.Size = '251, 356'
 	$groupbox3.TabIndex = 29
 	$groupbox3.TabStop = $False
 	$groupbox3.Text = 'Directories'
 	$groupbox3.UseCompatibleTextRendering = $True
+	#
+	# checkboxGroupPolicy
+	#
+	$checkboxGroupPolicy.Location = '5, 306'
+	$checkboxGroupPolicy.Name = 'checkboxGroupPolicy'
+	$checkboxGroupPolicy.Size = '104, 24'
+	$checkboxGroupPolicy.TabIndex = 45
+	$checkboxGroupPolicy.Text = 'Group Policy'
+	$checkboxGroupPolicy.UseCompatibleTextRendering = $True
+	$checkboxGroupPolicy.UseVisualStyleBackColor = $True
+	$checkboxGroupPolicy.add_CheckedChanged($checkboxGroupPolicy_CheckedChanged)
 	#
 	# checkboxComprehensiveBackup
 	#
@@ -6093,7 +6160,7 @@ AAA=')
 	#
 	# checkboxCustomDirectory
 	#
-	$checkboxCustomDirectory.Location = '5, 305'
+	$checkboxCustomDirectory.Location = '5, 326'
 	$checkboxCustomDirectory.Name = 'checkboxCustomDirectory'
 	$checkboxCustomDirectory.Size = '122, 24'
 	$checkboxCustomDirectory.TabIndex = 36
@@ -6104,7 +6171,7 @@ AAA=')
 	#
 	# textbox7
 	#
-	$textbox7.Location = '128, 305'
+	$textbox7.Location = '128, 326'
 	$textbox7.Name = 'textbox7'
 	$textbox7.Size = '100, 20'
 	$textbox7.TabIndex = 35
@@ -6249,7 +6316,7 @@ AAA=')
 	#
 	$buttonDisplayPrinters.BackColor = 'MenuHighlight'
 	$buttonDisplayPrinters.Font = 'Arial, 9pt, style=Bold'
-	$buttonDisplayPrinters.Location = '146, 467'
+	$buttonDisplayPrinters.Location = '146, 483'
 	$buttonDisplayPrinters.Name = 'buttonDisplayPrinters'
 	$buttonDisplayPrinters.Size = '118, 45'
 	$buttonDisplayPrinters.TabIndex = 32
@@ -6267,22 +6334,21 @@ AAA=')
 	$tabpage3.ResumeLayout()
 	$tabpage1.ResumeLayout()
 	$tabcontrol1.ResumeLayout()
-	$formProfileBackup019ByAl.ResumeLayout()
+	$formProfileBackup020ByAl.ResumeLayout()
 	#endregion Generated Form Code
 
 	#----------------------------------------------
 
 	#Save the initial state of the form
-	$InitialFormWindowState = $formProfileBackup019ByAl.WindowState
+	$InitialFormWindowState = $formProfileBackup020ByAl.WindowState
 	#Init the OnLoad event to correct the initial state of the form
-	$formProfileBackup019ByAl.add_Load($Form_StateCorrection_Load)
+	$formProfileBackup020ByAl.add_Load($Form_StateCorrection_Load)
 	#Clean up the control events
-	$formProfileBackup019ByAl.add_FormClosed($Form_Cleanup_FormClosed)
+	$formProfileBackup020ByAl.add_FormClosed($Form_Cleanup_FormClosed)
 	#Show the Form
-	return $formProfileBackup019ByAl.ShowDialog()
+	return $formProfileBackup020ByAl.ShowDialog()
 
 } #End Function
 
 #Call the form
 Show-ProfileBackup | Out-Null
-
