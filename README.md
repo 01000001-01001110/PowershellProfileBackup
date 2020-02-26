@@ -1,6 +1,6 @@
 #Powershell Profile Backup<br>
 <br>
-If you'd like to show your appreciation you can buy me a tea <a href="buymeacoff.ee/mwWXAyznc">here</a><br><br>
+
 
 ![image](https://user-images.githubusercontent.com/48245017/75276609-78d30500-57d4-11ea-88f1-053f11ca2a5d.png)
 
