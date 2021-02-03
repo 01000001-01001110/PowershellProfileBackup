@@ -364,53 +364,51 @@ function Show-ProfileBackup {
 		{
 			New-Item -ItemType Directory -Force -Path $path
 		}
-		#This is setup as an array for multiple systems, dumbed down this portion of the script to flow correctly.
-		Set-Variable -Name ExportFolder -Value "$Path\Desktop\$cn\Logs\$now"
-		$ExportFile = $ExportFolder + "el" + $now.ToString("yyyy-MM-dd---hh-mm-ss") + ".csv"
-		Write-Host = "PSDrive"
+		
+		# = "PSDrive"
 		$richtextbox1.Text += "Gathering Powershell Drive Mappings.`n"
 		Get-PSDrive | Export-CSV "$Path\PSDrive.csv" -NoTypeInfo
-		Write-Host = "Logical Drives"
+		# = "Logical Drives"
 		$richtextbox1.Text += "Gathering Logical Drive Mappings.`n"
 		Get-CimInstance -Class Win32_LogicalDisk | Export-CSV "$Path\LogicalDisk.csv" -NoTypeInfo
-		Write-Host = "Network Drives"
+		# = "Network Drives"
 		$richtextbox1.Text += "Gathering Network Drive Mappings`n"
 		Get-CimInstance -Class Win32_NetworkConnection | Export-CSV "$Path\NetworkConnectedDrives.csv" -NoTypeInfo
-		Write-Host = "Connected Drives"
+		# = "Connected Drives"
 		$richtextbox1.Text += "Gathering Connected Drive Mappings.`n"
 		Get-PSDrive -PSProvider FileSystem | Export-CSV "$Path\ConnectedDrives.csv" -NoTypeInfo
-		Write-Host = "OSInfo"
+		# = "OSInfo"
 		$richtextbox1.Text += "Gathering OS Info.`n"
 		Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, ServicePackMajorVersion, OSArchitecture, CSName, WindowsDirectory | Export-CSV "$Path\OSInfo.csv" -NoTypeInfo
-		Write-Host = "BIOS Settings"
+		# = "BIOS Settings"
 		$richtextbox1.Text += "Gathering BIOS info.`n"
 		Get-Ciminstance -classname win32_bios -computername $env:COMPUTERNAME | format-list serialnumber | Export-CSV "$Path\BIOS.csv" -NoTypeInfo
-		Write-Host = "IPConfig"
+		# = "IPConfig"
 		$richtextbox1.Text += "Gathering IP Config Info.`n"
 		Get-NetIPConfiguration -Detailed | Export-CSV "$Path\IPConfig.csv" -NoTypeInfo
-		Write-Host = "Local Admins"
+		# = "Local Admins"
 		$richtextbox1.Text += "Gathering Local Admin Settings.`n"
 		Get-LocalGroupMember -Group "Administrators" | Export-CSV "$Path\AdminAccounts.csv" -NoTypeInfo
-		Write-Host = "Comptuername"
+		# = "Comptuername"
 		$richtextbox1.Text += "Gathering Computer Name.`n"
 		$obj = New-Object psobject -Property @{ ComputerName = $env:COMPUTERNAME }
 		$obj | Export-Csv -Path $Path\ComputerName.csv -Encoding UTF8 -NoTypeInformation
-		Write-Host = "Firewalls"
+		# = "Firewalls"
 		$richtextbox1.Text += "Gathering Firewall Settings.`n"
 		Get-NetFirewallRule -PolicyStore ActiveStore | Export-CSV "$Path\Firewall.csv" -NoTypeInfo
-		Write-Host = "Application Events - Not Gathered Due to Secuity Policies."
+		# = "Application Events - Not Gathered Due to Secuity Policies."
 		$logfile = Get-WmiObject -Class win32_NTEventlogFile -Filter "logFileName='Application'"
 		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_Application_Logs.evt')
-		Write-Host = "System Events"
+		# = "System Events"
 		$logfile = Get-WmiObject -Class win32_NTEventlogFile -Filter "logFileName='System'"
 		$logfile.ClearEventlog('$dest\Desktop\$cn\Logs\%computername%_System_Logs.evt')
-		Write-Host = "Installed Apps"
+		# = "Installed Apps"
 		$richtextbox1.Text += "Gathering Installed Applications.`n"
 		Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Export-CSV "$Path\InstalledApplications.csv" -NoTypeInfo
-		#Write-Host = "Processes - Not Gathered Due to Secuity Policies."
+		## = "Processes - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering Current Processes.`n"
 		Get-Process | Export-CSV "$Path\Processes.csv" -NoTypeInfo
-		#Write-Host = "Service - Not Gathered Due to Secuity Policies."
+		## = "Service - Not Gathered Due to Secuity Policies."
 		$richtextbox1.Text += "Gathering System Services.`n"
 		Get-Service | Export-CSV "$Path\Services.csv" -NoTypeInfo
 		$richtextbox1.Text += "Consolidating to one Excel File`n"
@@ -425,13 +423,6 @@ function Show-ProfileBackup {
 		Copy-Item "$deleteallotherdatanowbutnotthis\%computername%_System_Logs.evt" -Destination "$dest\Logs\$cn"
 		Copy-Item "$deleteallotherdatanowbutnotthis\%computername%_Application_Logs.evt" -Destination "$dest\Logs\$cn"
 		#Time to clean up this mess.
-		Remove-Variable ExportFile
-		Remove-Variable ExportFolder
-		Remove-Variable now
-		Remove-Variable cn
-		Remove-Variable dest
-		Remove-Variable source
-		Remove-Variable deleteallotherdatanow
 	}
 	
 	function updateTextBox2
